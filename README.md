@@ -6,6 +6,10 @@ So, if you haven't realized yet, this is not an actual way to learn how to play 
 
 ALSO do NOT do this to people who don't want to/know what they're getting into. As funny as it would be, strapping in someone who doesn't know they're getting tazed is just an asshole move. Do not do it 🔫.
 
+
+**Additionally, feel free to tinker with the code however you like. If you want to use this yourself, follow the 'setup' link below.
+
+
 Website: https://taser-chess.ducksincoming.repl.co/index.html
 
 Setup: https://drive.google.com/file/d/1RBCfYcd-aIdEsLh_PVWr_FLa-_xbgggk/view
