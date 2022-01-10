@@ -7,4 +7,5 @@ Honestly I just thought of the idea of "chess, but with taser" was funny and ran
 **Additionally, feel free to fuck with the code however you like. If you want to use this yourself, follow the 'setup' link below.
 
 Setup: https://drive.google.com/file/d/1RBCfYcd-aIdEsLh_PVWr_FLa-_xbgggk/view
+
 Video: https://www.youtube.com/watch?v=lPGipwoJiOM
