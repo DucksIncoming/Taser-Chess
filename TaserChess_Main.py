@@ -120,7 +120,7 @@ def drawSprite(imagePath : str, position : tuple = (0, 0), scale : tuple = (0, 0
     
     WIN.blit(img, position)
 
-def debugDraw():
+def initialFenDraw():
     drawSprite(pieces_standard.get("b_rook"), indexPosition(0), (100, 100))
     drawSprite(pieces_standard.get("b_knight"), indexPosition(1), (100, 100))
     drawSprite(pieces_standard.get("b_bishop"), indexPosition(2), (100, 100))
@@ -158,7 +158,7 @@ def debugDraw():
 def drawWindow():
     WIN.fill(GRAY)
     drawSprite(boards.get(boardStyle), BOARD_ORIGIN)
-    debugDraw()
+    initialFenDraw()
 
     pygame.display.update()
 
