@@ -1,5 +1,6 @@
 import chess
 import chess.engine
+import pygame
 
 # Import stockfish because it's better than anything I can make
 engine = chess.engine.SimpleEngine.popen_uci(r"stockfish_14.1_win_x64_avx2\stockfish_14.1_win_x64_avx2.exe")
@@ -25,7 +26,7 @@ while not board.is_game_over():
     else:
         referenceScore = info["score"].black().score()
         print("Black's turn:")
-
+  
     moveAttempt = input()
     if ((chess.Move.from_uci(moveAttempt) in board.legal_moves) and (board.color_at(chess.parse_square(moveAttempt[0:2])) == board.turn)):
         board.push(chess.Move.from_uci(moveAttempt))
