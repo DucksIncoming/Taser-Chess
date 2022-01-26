@@ -109,41 +109,6 @@ pieces_standard = {
     "b_king": "Assets/Pieces/pieces_standard/standard_Bking.png"
 }
 
-def debugDraw():
-    Piece(pieces_standard.get("b_rook"), 0)
-    Piece(pieces_standard.get("b_knight"), 1)
-    Piece(pieces_standard.get("b_bishop"), 2)
-    Piece(pieces_standard.get("b_queen"), 3)
-    Piece(pieces_standard.get("b_king"), 4)
-    Piece(pieces_standard.get("b_bishop"), 5)
-    Piece(pieces_standard.get("b_knight"), 6)
-    Piece(pieces_standard.get("b_rook"), 7)
-    Piece(pieces_standard.get("b_pawn"), 8)
-    Piece(pieces_standard.get("b_pawn"), 9)
-    Piece(pieces_standard.get("b_pawn"), 10)
-    Piece(pieces_standard.get("b_pawn"), 11)
-    Piece(pieces_standard.get("b_pawn"), 12)
-    Piece(pieces_standard.get("b_pawn"), 13)
-    Piece(pieces_standard.get("b_pawn"), 14)
-    Piece(pieces_standard.get("b_pawn"), 15)
-
-    Piece(pieces_standard.get("w_pawn"), 48)
-    Piece(pieces_standard.get("w_pawn"), 49)
-    Piece(pieces_standard.get("w_pawn"), 50)
-    Piece(pieces_standard.get("w_pawn"), 51)
-    Piece(pieces_standard.get("w_pawn"), 52)
-    Piece(pieces_standard.get("w_pawn"), 53)    
-    Piece(pieces_standard.get("w_pawn"), 54)
-    Piece(pieces_standard.get("w_pawn"), 55)
-    Piece(pieces_standard.get("w_rook"), 56)
-    Piece(pieces_standard.get("w_knight"), 57)
-    Piece(pieces_standard.get("w_bishop"), 58)
-    Piece(pieces_standard.get("w_queen"), 59)
-    Piece(pieces_standard.get("w_king"), 60)
-    Piece(pieces_standard.get("w_bishop"), 61)
-    Piece(pieces_standard.get("w_knight"), 62)
-    Piece(pieces_standard.get("w_rook"), 63)
-
 def indexToSquare(index : int):
     if (index < 0):
         index = 0
@@ -195,6 +160,30 @@ def drawSprite(imagePath : str, position : tuple = (0, 0), scale : tuple = (0, 0
         img = pygame.transform.scale(img, scale)
     
     WIN.blit(img, position)
+
+def drawHeldPiece(pieceSymbol):
+    if (pieceSymbol.isupper()):
+        pieceSelection = "b_"
+    else:
+        pieceSelection = "w_"
+
+    pieceSelector = pieceSelection + charToPiece.get(pieceSymbol.lower())
+
+    if (pieceStyle == "standard"):
+        piecePath = pieces_standard.get(pieceSelector)
+    elif (pieceStyle == "silhouette"):
+        piecePath = pieces_silhouette.get(pieceSelector)
+    elif (pieceStyle == "artistic"):
+        piecePath = pieces_artistic.get(pieceSelector)
+    else:
+        piecePath = pieces_realistic.get(pieceSelector)
+
+    img = pygame.image.load(piecePath)
+    img = pygame.transform.scale(img, (100, 100))
+
+    drawWindow()
+    WIN.blit(img, ((pygame.mouse.get_pos()[0] - 50), pygame.mouse.get_pos()[1] - 50))
+    pygame.display.update()
 
 class Piece():
     _pieceList = []
@@ -296,15 +285,16 @@ def main():
         if (pygame.mouse.get_pressed()[0]):
             mousePos = pygame.mouse.get_pos()
 
-            if (prevMouseState == False and pygame.mouse.get_pressed()[0]): # Gets the initial square you press down on
+            if (prevMouseState == False): # Gets the initial square you press down on
                 prevMouseState = True
                 for p in Piece._pieceList:
                     focusedPiece = p
                     if (p.collideCheck(mousePos)):
                         fromSquare = indexToSquare(p.indexPos)
-                        print(board.piece_at(p.indexPos).symbol())
                         #print(indexToSquare(getMouseSquare(mousePos)))
                         drawWindow()
+                        print(p.indexPos)
+                        drawHeldPiece(board.piece_at(p.indexPos).symbol())
                         break
         elif (not pygame.mouse.get_pressed()[0] and prevMouseState): # Gets the square you let go of your mouse on
             toSquare = indexToSquare(getMouseSquare(mousePos))
@@ -312,24 +302,13 @@ def main():
 
             if (fromSquare != toSquare):
                 moveAttempt = fromSquare + toSquare
-
-                if (chess.Move.from_uci(moveAttempt) in board.legal_moves):
-                    #print(moveAttempt)
-                    engineAnalysis(moveAttempt)
-                    tempFen = (board.fen(shredder=True))
-
-                    tempFen = tempFen[0:-3]
-                    tempFen = tempFen.replace('/','')
-                    tempFen = tempFen.replace('H','')
-                    tempFen = tempFen.replace('h','')
-                    tempFen = tempFen.replace('A','')
-                    tempFen = tempFen.replace('a','')
-                    tempFen = tempFen.replace('-','')
-                    tempFen = tempFen.replace(' ','')
-                    tempFen = tempFen[:-1]
-
-                    print(tempFen)
-                    drawWindow()
+                try:
+                    if (chess.Move.from_uci(moveAttempt) in board.legal_moves):
+                        #print(moveAttempt)
+                        engineAnalysis(moveAttempt)
+                        drawWindow()
+                except:
+                    print("")
         else:
             prevMouseState = pygame.mouse.get_pressed()[0]
             drawWindow()

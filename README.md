@@ -4,7 +4,7 @@ Of course, it doesn't just explain why the move was a mistake and how not to mak
 
 Honestly I just thought of the idea of "chess, but with taser" was funny and ran with it and wanted some dumb justification for it. Either way it's really funny to watch people play it and that's honestly all that matters.
 
-**Additionally, feel free to fuck with the code however you like. If you want to use this yourself, follow the 'setup' link below.
+**Also, feel free to fuck with the code however you like. If you want to use this yourself, follow the 'setup' link below.
 
 Setup: https://drive.google.com/file/d/1RBCfYcd-aIdEsLh_PVWr_FLa-_xbgggk/view
 
