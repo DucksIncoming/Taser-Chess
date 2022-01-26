@@ -14,8 +14,8 @@ searchDepth = 10
 referenceScore = 0
 newScore = 0
 
-def engineMain():
-    while not board.is_game_over():
+def engineAnalysis(moveAttempt):
+    if not board.is_game_over():
         info = engine.analyse(board, chess.engine.Limit(depth=searchDepth))
     
         # Get a score for the initial position to compare the new score after a move to
@@ -26,7 +26,6 @@ def engineMain():
             referenceScore = info["score"].black().score()
             print("Black's turn:")
     
-        moveAttempt = input()
         if ((chess.Move.from_uci(moveAttempt) in board.legal_moves) and (board.color_at(chess.parse_square(moveAttempt[0:2])) == board.turn)):
             board.push(chess.Move.from_uci(moveAttempt))
 
@@ -68,5 +67,5 @@ def engineMain():
                 print(board.winner())
             except:
                 print("Draw")
-
-    engine.quit()
+    else:
+        engine.quit()

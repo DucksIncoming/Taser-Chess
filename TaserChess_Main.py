@@ -128,6 +128,23 @@ def indexPosition(index : int):
 
     return (xPos, yPos)
 
+def getMouseSquare(position : tuple):
+    column : int = 0
+    row : int = 0
+
+    for colCheck in range(8):
+        if (position[1] > (colCheck * 100 + BOARD_ORIGIN[1]) and position[1] < (colCheck * 100 + BOARD_ORIGIN[1] + 100)):
+            column = colCheck
+            break
+    
+    for rowCheck in range(8):
+        if (position[0] > (rowCheck * 100 + BOARD_ORIGIN[0]) and position[0] < (rowCheck * 100 + BOARD_ORIGIN[0] + 100)):
+            row = rowCheck
+            break
+    
+    return (column * 8) + row
+
+
 def drawSprite(imagePath : str, position : tuple = (0, 0), scale : tuple = (0, 0)):
     img = pygame.image.load(imagePath)
     if (scale != (0, 0)):
@@ -194,10 +211,21 @@ def initialFenDraw():
 def drawWindow():
     pygame.display.update()
 
+def drawFromFen(fen : str):
+    referenceIndex = 0
+    
+    #for fenChar in fen:
+
+
 def main():
+    
     prevMouseState = False
     clock = pygame.time.Clock()
     run = True
+    fromSquare = ""
+    toSquare = ""
+
+
     WIN.fill(GRAY)
     drawSprite(boards.get(boardStyle), BOARD_ORIGIN)
     initialFenDraw()
@@ -215,16 +243,27 @@ def main():
         if (pygame.mouse.get_pressed()[0]):
             mousePos = pygame.mouse.get_pos()
 
-            if (prevMouseState == False and pygame.mouse.get_pressed()[0]):
+            if (prevMouseState == False and pygame.mouse.get_pressed()[0]): # Gets the initial square you press down on
                 prevMouseState = True
                 for p in Piece._pieceList:
                     focusedPiece = p
                     if (p.collideCheck(mousePos)):
-                        print(indexToSquare(p.indexPos))
+                        fromSquare = indexToSquare(p.indexPos)
                         p.image.set_alpha(0)
                         p.drawPiece()
+                        #print(indexToSquare(getMouseSquare(mousePos)))
                         drawWindow()
                         break
+        elif (not pygame.mouse.get_pressed()[0] and prevMouseState): # Gets the square you let go of your mouse on
+            toSquare = indexToSquare(getMouseSquare(mousePos))
+            prevMouseState = False
+
+            if (fromSquare != toSquare):
+                moveAttempt = fromSquare + toSquare
+
+                if (chess.Move.from_uci(moveAttempt) in board.legal_moves):
+                    #print(moveAttempt)
+                    engineAnalysis(moveAttempt)
         else:
             prevMouseState = pygame.mouse.get_pressed()[0]
     
