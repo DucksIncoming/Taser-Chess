@@ -14,6 +14,15 @@ WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 FPS_CAP = 60
 BOARD_ORIGIN = (560, 140)
 
+charToPiece = {
+        "k": "king",
+        "q": "queen",
+        "r": "rook",
+        "b": "bishop",
+        "n": "knight",
+        "p": "pawn"
+    }
+
 # Colors
 GRAY = (30, 30, 30)
 
@@ -70,7 +79,7 @@ pieces_realistic = {
     "b_king": "Assets/Pieces/pieces_realistic/realistic_Bking.png"
 }
 
-pieces_silhouuette = {
+pieces_silhouette = {
     "w_pawn": "Assets/Pieces/pieces_silhouette/silhouette_Wpawn.png",
     "w_knight": "Assets/Pieces/pieces_silhouette/silhouette_Wknight.png",
     "w_rook": "Assets/Pieces/pieces_silhouette/silhouette_Wrook.png",
@@ -99,6 +108,41 @@ pieces_standard = {
     "b_queen": "Assets/Pieces/pieces_standard/standard_Bqueen.png",
     "b_king": "Assets/Pieces/pieces_standard/standard_Bking.png"
 }
+
+def debugDraw():
+    Piece(pieces_standard.get("b_rook"), 0)
+    Piece(pieces_standard.get("b_knight"), 1)
+    Piece(pieces_standard.get("b_bishop"), 2)
+    Piece(pieces_standard.get("b_queen"), 3)
+    Piece(pieces_standard.get("b_king"), 4)
+    Piece(pieces_standard.get("b_bishop"), 5)
+    Piece(pieces_standard.get("b_knight"), 6)
+    Piece(pieces_standard.get("b_rook"), 7)
+    Piece(pieces_standard.get("b_pawn"), 8)
+    Piece(pieces_standard.get("b_pawn"), 9)
+    Piece(pieces_standard.get("b_pawn"), 10)
+    Piece(pieces_standard.get("b_pawn"), 11)
+    Piece(pieces_standard.get("b_pawn"), 12)
+    Piece(pieces_standard.get("b_pawn"), 13)
+    Piece(pieces_standard.get("b_pawn"), 14)
+    Piece(pieces_standard.get("b_pawn"), 15)
+
+    Piece(pieces_standard.get("w_pawn"), 48)
+    Piece(pieces_standard.get("w_pawn"), 49)
+    Piece(pieces_standard.get("w_pawn"), 50)
+    Piece(pieces_standard.get("w_pawn"), 51)
+    Piece(pieces_standard.get("w_pawn"), 52)
+    Piece(pieces_standard.get("w_pawn"), 53)    
+    Piece(pieces_standard.get("w_pawn"), 54)
+    Piece(pieces_standard.get("w_pawn"), 55)
+    Piece(pieces_standard.get("w_rook"), 56)
+    Piece(pieces_standard.get("w_knight"), 57)
+    Piece(pieces_standard.get("w_bishop"), 58)
+    Piece(pieces_standard.get("w_queen"), 59)
+    Piece(pieces_standard.get("w_king"), 60)
+    Piece(pieces_standard.get("w_bishop"), 61)
+    Piece(pieces_standard.get("w_knight"), 62)
+    Piece(pieces_standard.get("w_rook"), 63)
 
 def indexToSquare(index : int):
     if (index < 0):
@@ -173,48 +217,57 @@ class Piece():
     def collideCheck(self, mouse):
         return self.rect.collidepoint(mouse)
 
-def initialFenDraw():
-    Piece(pieces_standard.get("b_rook"), 0)
-    Piece(pieces_standard.get("b_knight"), 1)
-    Piece(pieces_standard.get("b_bishop"), 2)
-    Piece(pieces_standard.get("b_queen"), 3)
-    Piece(pieces_standard.get("b_king"), 4)
-    Piece(pieces_standard.get("b_bishop"), 5)
-    Piece(pieces_standard.get("b_knight"), 6)
-    Piece(pieces_standard.get("b_rook"), 7)
-    Piece(pieces_standard.get("b_pawn"), 8)
-    Piece(pieces_standard.get("b_pawn"), 9)
-    Piece(pieces_standard.get("b_pawn"), 10)
-    Piece(pieces_standard.get("b_pawn"), 11)
-    Piece(pieces_standard.get("b_pawn"), 12)
-    Piece(pieces_standard.get("b_pawn"), 13)
-    Piece(pieces_standard.get("b_pawn"), 14)
-    Piece(pieces_standard.get("b_pawn"), 15)
-
-    Piece(pieces_standard.get("w_pawn"), 48)
-    Piece(pieces_standard.get("w_pawn"), 49)
-    Piece(pieces_standard.get("w_pawn"), 50)
-    Piece(pieces_standard.get("w_pawn"), 51)
-    Piece(pieces_standard.get("w_pawn"), 52)
-    Piece(pieces_standard.get("w_pawn"), 53)    
-    Piece(pieces_standard.get("w_pawn"), 54)
-    Piece(pieces_standard.get("w_pawn"), 55)
-    Piece(pieces_standard.get("w_rook"), 56)
-    Piece(pieces_standard.get("w_knight"), 57)
-    Piece(pieces_standard.get("w_bishop"), 58)
-    Piece(pieces_standard.get("w_queen"), 59)
-    Piece(pieces_standard.get("w_king"), 60)
-    Piece(pieces_standard.get("w_bishop"), 61)
-    Piece(pieces_standard.get("w_knight"), 62)
-    Piece(pieces_standard.get("w_rook"), 63)
-
 def drawWindow():
+    pygame.display.update()
+    WIN.fill(GRAY)
+    drawSprite(boards.get(boardStyle), BOARD_ORIGIN)
+    drawFromFen(board.fen(shredder=True))
     pygame.display.update()
 
 def drawFromFen(fen : str):
+    pieceSelector = ""
     referenceIndex = 0
     
-    #for fenChar in fen:
+    # Trim down fen for only the useful bits
+    # Is there a better way to do this? Almost certainly.
+    # Am I gonna do it better? Not a chance
+    fen = fen[0:-3]
+    fen = fen.replace('/','')
+    fen = fen.replace('H','')
+    fen = fen.replace('h','')
+    fen = fen.replace('A','')        # Sorry if you're like a competent programmer and this causes you physical pain
+    fen = fen.replace('a','')
+    fen = fen.replace('-','')
+    fen = fen.replace(' ','')
+    fen = fen[:-1]
+
+    #print(fen)
+
+    for fenChar in fen:
+        if (fenChar.isdigit()):
+            referenceIndex += int(fenChar)
+            
+        else:
+            if (fenChar.isupper()):
+                pieceSelector = "w_"
+            else:
+                pieceSelector = "b_"
+
+            pieceSelector = pieceSelector +  str(charToPiece.get(fenChar.lower()))
+            if (type(pieceSelector) != None):
+                piecePath = ""
+
+                if (pieceStyle == "standard"):
+                    piecePath = pieces_standard.get(pieceSelector)
+                elif (pieceStyle == "silhouette"):
+                    piecePath = pieces_silhouette.get(pieceSelector)
+                elif (pieceStyle == "artistic"):
+                    piecePath = pieces_artistic.get(pieceSelector)
+                else:
+                    piecePath = pieces_realistic.get(pieceSelector)
+                
+                Piece(piecePath, referenceIndex)
+                referenceIndex += 1
 
 
 def main():
@@ -228,7 +281,7 @@ def main():
 
     WIN.fill(GRAY)
     drawSprite(boards.get(boardStyle), BOARD_ORIGIN)
-    initialFenDraw()
+    drawFromFen(board.fen(shredder=True))
 
     pygame.display.update()
 
@@ -249,8 +302,7 @@ def main():
                     focusedPiece = p
                     if (p.collideCheck(mousePos)):
                         fromSquare = indexToSquare(p.indexPos)
-                        p.image.set_alpha(0)
-                        p.drawPiece()
+                        print(board.piece_at(p.indexPos).symbol())
                         #print(indexToSquare(getMouseSquare(mousePos)))
                         drawWindow()
                         break
@@ -264,7 +316,22 @@ def main():
                 if (chess.Move.from_uci(moveAttempt) in board.legal_moves):
                     #print(moveAttempt)
                     engineAnalysis(moveAttempt)
+                    tempFen = (board.fen(shredder=True))
+
+                    tempFen = tempFen[0:-3]
+                    tempFen = tempFen.replace('/','')
+                    tempFen = tempFen.replace('H','')
+                    tempFen = tempFen.replace('h','')
+                    tempFen = tempFen.replace('A','')
+                    tempFen = tempFen.replace('a','')
+                    tempFen = tempFen.replace('-','')
+                    tempFen = tempFen.replace(' ','')
+                    tempFen = tempFen[:-1]
+
+                    print(tempFen)
+                    drawWindow()
         else:
             prevMouseState = pygame.mouse.get_pressed()[0]
+            drawWindow()
     
     pygame.quit()
