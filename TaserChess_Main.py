@@ -108,8 +108,8 @@ def indexPosition(index : int):
     column = math.floor(index / 8)
     row = index % 8
 
-    xPos = (row * 100) + 560
-    yPos = (column * 100) + 140
+    xPos = (row * 100) + BOARD_ORIGIN[0]
+    yPos = (column * 100) + BOARD_ORIGIN[1]
 
     return (xPos, yPos)
 
@@ -120,40 +120,58 @@ def drawSprite(imagePath : str, position : tuple = (0, 0), scale : tuple = (0, 0
     
     WIN.blit(img, position)
 
-def initialFenDraw():
-    drawSprite(pieces_standard.get("b_rook"), indexPosition(0), (100, 100))
-    drawSprite(pieces_standard.get("b_knight"), indexPosition(1), (100, 100))
-    drawSprite(pieces_standard.get("b_bishop"), indexPosition(2), (100, 100))
-    drawSprite(pieces_standard.get("b_queen"), indexPosition(3), (100, 100))
-    drawSprite(pieces_standard.get("b_king"), indexPosition(4), (100, 100))
-    drawSprite(pieces_standard.get("b_bishop"), indexPosition(5), (100, 100))
-    drawSprite(pieces_standard.get("b_knight"), indexPosition(6), (100, 100))
-    drawSprite(pieces_standard.get("b_rook"), indexPosition(7), (100, 100))
-    drawSprite(pieces_standard.get("b_pawn"), indexPosition(8), (100, 100))
-    drawSprite(pieces_standard.get("b_pawn"), indexPosition(9), (100, 100))
-    drawSprite(pieces_standard.get("b_pawn"), indexPosition(10), (100, 100))
-    drawSprite(pieces_standard.get("b_pawn"), indexPosition(11), (100, 100))
-    drawSprite(pieces_standard.get("b_pawn"), indexPosition(12), (100, 100))
-    drawSprite(pieces_standard.get("b_pawn"), indexPosition(13), (100, 100))
-    drawSprite(pieces_standard.get("b_pawn"), indexPosition(14), (100, 100))
-    drawSprite(pieces_standard.get("b_pawn"), indexPosition(15), (100, 100))
+class Piece():
+    _pieceList = []
 
-    drawSprite(pieces_standard.get("w_pawn"), indexPosition(48), (100, 100))
-    drawSprite(pieces_standard.get("w_pawn"), indexPosition(49), (100, 100))
-    drawSprite(pieces_standard.get("w_pawn"), indexPosition(50), (100, 100))
-    drawSprite(pieces_standard.get("w_pawn"), indexPosition(51), (100, 100))
-    drawSprite(pieces_standard.get("w_pawn"), indexPosition(52), (100, 100))
-    drawSprite(pieces_standard.get("w_pawn"), indexPosition(53), (100, 100))    
-    drawSprite(pieces_standard.get("w_pawn"), indexPosition(54), (100, 100))
-    drawSprite(pieces_standard.get("w_pawn"), indexPosition(55), (100, 100))
-    drawSprite(pieces_standard.get("w_rook"), indexPosition(56), (100, 100))
-    drawSprite(pieces_standard.get("w_knight"), indexPosition(57), (100, 100))
-    drawSprite(pieces_standard.get("w_bishop"), indexPosition(58), (100, 100))
-    drawSprite(pieces_standard.get("w_queen"), indexPosition(59), (100, 100))
-    drawSprite(pieces_standard.get("w_king"), indexPosition(60), (100, 100))
-    drawSprite(pieces_standard.get("w_bishop"), indexPosition(61), (100, 100))
-    drawSprite(pieces_standard.get("w_knight"), indexPosition(62), (100, 100))
-    drawSprite(pieces_standard.get("w_rook"), indexPosition(63), (100, 100))
+    def __init__(self, piecePath, indexPos : int):
+        self._pieceList.append(self)
+        
+        self.image = pygame.transform.scale(pygame.image.load(piecePath), (100, 100))
+        self.index = indexPos
+        self.x = indexPosition(indexPos)[0]
+        self.y = indexPosition(indexPos)[1]
+        self.rect = self.image.get_rect(topleft=(self.x, self.y))
+        self.indexPos = indexPos
+        
+        WIN.blit(self.image, (self.x, self.y))
+
+    def collideCheck(self, mouse):
+        return self.rect.collidepoint(mouse)
+
+def initialFenDraw():
+    Piece(pieces_standard.get("b_rook"), 0)
+    Piece(pieces_standard.get("b_knight"), 1)
+    Piece(pieces_standard.get("b_bishop"), 2)
+    Piece(pieces_standard.get("b_queen"), 3)
+    Piece(pieces_standard.get("b_king"), 4)
+    Piece(pieces_standard.get("b_bishop"), 5)
+    Piece(pieces_standard.get("b_knight"), 6)
+    Piece(pieces_standard.get("b_rook"), 7)
+    Piece(pieces_standard.get("b_pawn"), 8)
+    Piece(pieces_standard.get("b_pawn"), 9)
+    Piece(pieces_standard.get("b_pawn"), 10)
+    Piece(pieces_standard.get("b_pawn"), 11)
+    Piece(pieces_standard.get("b_pawn"), 12)
+    Piece(pieces_standard.get("b_pawn"), 13)
+    Piece(pieces_standard.get("b_pawn"), 14)
+    Piece(pieces_standard.get("b_pawn"), 15)
+
+    Piece(pieces_standard.get("w_pawn"), 48)
+    Piece(pieces_standard.get("w_pawn"), 49)
+    Piece(pieces_standard.get("w_pawn"), 50)
+    Piece(pieces_standard.get("w_pawn"), 51)
+    Piece(pieces_standard.get("w_pawn"), 52)
+    Piece(pieces_standard.get("w_pawn"), 53)    
+    Piece(pieces_standard.get("w_pawn"), 54)
+    Piece(pieces_standard.get("w_pawn"), 55)
+    Piece(pieces_standard.get("w_rook"), 56)
+    Piece(pieces_standard.get("w_knight"), 57)
+    Piece(pieces_standard.get("w_bishop"), 58)
+    Piece(pieces_standard.get("w_queen"), 59)
+    Piece(pieces_standard.get("w_king"), 60)
+    Piece(pieces_standard.get("w_bishop"), 61)
+    Piece(pieces_standard.get("w_knight"), 62)
+    Piece(pieces_standard.get("w_rook"), 63)
 
 def drawWindow():
     WIN.fill(GRAY)
@@ -163,6 +181,7 @@ def drawWindow():
     pygame.display.update()
 
 def main():
+    prevMouseState = False
     clock = pygame.time.Clock()
     run = True
     while run:
@@ -171,8 +190,15 @@ def main():
 
             if event.type == pygame.QUIT:
                 run = False
-        
-        drawWindow()
-        
 
-main()
+            if (pygame.mouse.get_pressed()[0]):
+                mousePos = pygame.mouse.get_pos()
+
+                if (not prevMouseState):
+                    
+                    for p in Piece._pieceList:
+                        if (p.collideCheck(mousePos)):
+                            print(p.indexPos)
+                        
+        prevMouseState = pygame.mouse.get_pressed()[0]
+        drawWindow()
