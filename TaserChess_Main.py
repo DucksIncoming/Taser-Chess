@@ -1,7 +1,8 @@
-#import chess
-#import chess.engine
-#import time
-#from pyfirmata import Arduino
+import chess
+import chess.engine
+import time
+from pyfirmata import Arduino
+from TaserChess_Engine import *
 
 import pygame
 import os
@@ -99,6 +100,20 @@ pieces_standard = {
     "b_king": "Assets/Pieces/pieces_standard/standard_Bking.png"
 }
 
+def indexToSquare(index : int):
+    if (index < 0):
+        index = 0
+    if (index > 63):
+        index = 63
+
+    fileList = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
+    rankList = ['1', '2', '3', '4', '5', '6', '7', '8']
+
+    column = 7 - (math.floor(index / 8))
+    row = index % 8
+
+    return (fileList[row] + rankList[column])
+
 def indexPosition(index : int):
     if (index < 0):
         index = 0
@@ -184,6 +199,7 @@ def main():
     prevMouseState = False
     clock = pygame.time.Clock()
     run = True
+
     while run:
         clock.tick(FPS_CAP)
         for event in pygame.event.get():
@@ -191,14 +207,19 @@ def main():
             if event.type == pygame.QUIT:
                 run = False
 
-            if (pygame.mouse.get_pressed()[0]):
-                mousePos = pygame.mouse.get_pos()
+        if (pygame.mouse.get_pressed()[0]):
+            mousePos = pygame.mouse.get_pos()
 
-                if (not prevMouseState):
-                    
-                    for p in Piece._pieceList:
-                        if (p.collideCheck(mousePos)):
-                            print(p.indexPos)
-                        
-        prevMouseState = pygame.mouse.get_pressed()[0]
+            if (prevMouseState == False and pygame.mouse.get_pressed()[0]):
+                prevMouseState = True
+                for p in Piece._pieceList:
+                    focusedPiece = p
+                    if (p.collideCheck(mousePos)):
+                        print(indexToSquare(p.indexPos))
+                        break
+        else:
+            prevMouseState = pygame.mouse.get_pressed()[0]             
+        
         drawWindow()
+    
+    pygame.quit()
