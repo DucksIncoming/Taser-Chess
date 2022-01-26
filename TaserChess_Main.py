@@ -147,7 +147,10 @@ class Piece():
         self.y = indexPosition(indexPos)[1]
         self.rect = self.image.get_rect(topleft=(self.x, self.y))
         self.indexPos = indexPos
-        
+
+        WIN.blit(self.image, (self.x, self.y))
+
+    def drawPiece(self):
         WIN.blit(self.image, (self.x, self.y))
 
     def collideCheck(self, mouse):
@@ -189,18 +192,20 @@ def initialFenDraw():
     Piece(pieces_standard.get("w_rook"), 63)
 
 def drawWindow():
-    WIN.fill(GRAY)
-    drawSprite(boards.get(boardStyle), BOARD_ORIGIN)
-    initialFenDraw()
-
     pygame.display.update()
 
 def main():
     prevMouseState = False
     clock = pygame.time.Clock()
     run = True
+    WIN.fill(GRAY)
+    drawSprite(boards.get(boardStyle), BOARD_ORIGIN)
+    initialFenDraw()
+
+    pygame.display.update()
 
     while run:
+
         clock.tick(FPS_CAP)
         for event in pygame.event.get():
 
@@ -216,10 +221,11 @@ def main():
                     focusedPiece = p
                     if (p.collideCheck(mousePos)):
                         print(indexToSquare(p.indexPos))
+                        p.image.set_alpha(0)
+                        p.drawPiece()
+                        drawWindow()
                         break
         else:
-            prevMouseState = pygame.mouse.get_pressed()[0]             
-        
-        drawWindow()
+            prevMouseState = pygame.mouse.get_pressed()[0]
     
     pygame.quit()
