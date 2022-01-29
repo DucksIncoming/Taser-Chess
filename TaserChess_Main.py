@@ -30,6 +30,12 @@ GRAY = (30, 30, 30)
 boardStyle = "chesscom"
 pieceStyle = "standard"
 
+# Backgrounds
+backgrounds = {
+    True: "Assets/Icons/background_white.png",
+    False: "Assets/Icons/background_black.png"
+}
+
 # Boards
 boards = {
     "beach": "Assets/Boards/board_beach.png",
@@ -214,14 +220,14 @@ class Piece():
         self._pieceList.remove(self)
 
 def drawWindow():
-    WIN.fill(GRAY)
+    drawSprite(backgrounds.get(board.turn), (0,0))
     drawSprite(boards.get(boardStyle), BOARD_ORIGIN)
     drawFromFen(board.fen(shredder=True))
     drawUI()
     #pygame.display.update()
 
 def drawUI():
-    drawSprite("Assets/Icons/text_logo.png", (0, 974), (500, 106))
+    drawSprite("Assets/Icons/text_logo.png", (0, 920), (500, 160))
 
 def drawFromFen(fen : str):
     for p in Piece._pieceList:
@@ -374,11 +380,9 @@ def main():
             try:
                 drawHeldPiece(globalPSymbol)
             except:
-                drawWindow()
-                pygame.display.update()
+                print("")
             #print(getMouseSquare(mousePos))
         else:
             drawHeldPiece(globalPSymbol)
-            pygame.display.update()
     
     pygame.quit()
