@@ -350,7 +350,10 @@ def main():
                         board.remove_piece_at(heldPieceIndex)
                         drawHeldPiece(globalPSymbol)
                     except:
-                        globalPSymbol = ""
+                        try:
+                            drawHeldPiece(globalPSymbol)
+                        except:
+                            globalPSymbol = ""
         elif (not pygame.mouse.get_pressed()[0] and prevMouseState): # Gets the square you let go of your mouse on
             toSquare = indexToSquare(getMouseSquare(mousePos))
             prevMouseState = False
