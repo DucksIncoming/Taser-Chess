@@ -36,6 +36,12 @@ backgrounds = {
     False: "Assets/Icons/background_black.png"
 }
 
+# Arrows
+arrows = {
+    True: "Assets/Icons/whiteturn_arrow.png",
+    False: "Assets/Icons/blackturn_arrow.png"
+}
+
 # Boards
 boards = {
     "beach": "Assets/Boards/board_beach.png",
@@ -169,6 +175,7 @@ def drawSprite(imagePath : str, position : tuple = (0, 0), scale : tuple = (0, 0
 
 def drawHeldPiece(pieceSymbol):
     drawWindow()
+    pieceSelection = ""
     if (pieceSymbol != ""):
         if (pieceSymbol.isupper()):
             pieceSelection = "w_"
@@ -220,7 +227,8 @@ class Piece():
         self._pieceList.remove(self)
 
 def drawWindow():
-    drawSprite(backgrounds.get(board.turn), (0,0))
+    WIN.fill(GRAY)
+    #drawSprite(backgrounds.get(board.turn), (0,0))
     drawSprite(boards.get(boardStyle), BOARD_ORIGIN)
     drawFromFen(board.fen(shredder=True))
     drawUI()
@@ -228,6 +236,8 @@ def drawWindow():
 
 def drawUI():
     drawSprite("Assets/Icons/text_logo.png", (0, 920), (500, 160))
+    drawSprite("Assets/Icons/turn_icons.png", ((BOARD_ORIGIN[0] - 54)/2, 400-291 + BOARD_ORIGIN[1]), (108, 582))
+    drawSprite(arrows.get(board.turn), ((BOARD_ORIGIN[0] - 55)/2, 400-85 + BOARD_ORIGIN[1]), (110, 170))
 
 def drawFromFen(fen : str):
     for p in Piece._pieceList:
@@ -277,10 +287,7 @@ def drawFromFen(fen : str):
                 else:
                     piecePath = pieces_realistic.get(pieceSelector)
                 
-                try:
-                    Piece(piecePath, referenceIndex)
-                except:
-                    break
+                Piece(piecePath, referenceIndex)
                 referenceIndex += 1
     
 #pygame.display.update()
