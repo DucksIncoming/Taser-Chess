@@ -13,8 +13,12 @@ searchDepth = 10
 
 referenceScore = 0
 newScore = 0
+badMoveMade = False
 
 def engineAnalysis(moveAttempt):
+    global badMoveMade
+    badMoveMade = False
+    
     if not board.is_game_over():
         info = engine.analyse(board, chess.engine.Limit(depth=searchDepth))
     
@@ -55,6 +59,7 @@ def engineAnalysis(moveAttempt):
             try:
                 if (-(newScore - referenceScore) > 300):
                     print("Bad Move\n")
+                    badMoveMade = True
                 else:
                     print("Tolerable Move\n")
             except:
@@ -69,3 +74,7 @@ def engineAnalysis(moveAttempt):
                 print("Draw")
     else:
         engine.quit()
+
+def wasBadMove():
+    global badMoveMade
+    return badMoveMade

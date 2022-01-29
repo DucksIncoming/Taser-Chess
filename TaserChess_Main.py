@@ -6,10 +6,13 @@ from TaserChess_Engine import *
 
 import pygame
 import pygame.font
-import os
+from pygame import mixer
+import random
 import math
 
 pygame.font.init()
+mixer.init()
+mixer.music.set_volume(0.3)
 
 # Constant Variables
 WIDTH, HEIGHT = 1920, 1080
@@ -173,6 +176,33 @@ pieceCustomizer = {
     4: "Artistic",
     5: "Realistic"
 }
+
+moveAudio = {
+    1: "Assets/Audio/move1.wav",
+    2: "Assets/Audio/move2.wav",
+    3: "Assets/Audio/move3.wav",
+    4: "Assets/Audio/move4.wav",
+    5: "Assets/Audio/move5.wav",
+    6: "Assets/Audio/move6.wav",
+    7: "Assets/Audio/move7.wav",
+    8: "Assets/Audio/move8.wav"
+}
+
+def playAudio(cue):
+    if (cue == "move"):
+        randomAudio = random.choice([1, 2, 3, 4, 5, 6, 7, 8])
+        print(randomAudio)
+        mixer.music.load(moveAudio.get(randomAudio))
+        mixer.music.play()
+    elif (cue == "check"):
+        mixer.music.load("Assets/Audio/check.wav")
+        mixer.music.play()
+    elif (cue == "draw"):
+        mixer.music.load("Assets/Audio/draw.wav")
+        mixer.music.play()
+    else:
+        mixer.music.load("Assets/Audio/win.wav")
+        mixer.music.play()
 
 # Customization Variables
 boardStyle = boards.get("Chess.com")
@@ -430,18 +460,24 @@ def badMove():
     global whiteTazes
     global blackTazes
 
-    player = not board.turn
+    print("White: " + str(whiteTazes))
+    print("Black: " + str(blackTazes))
+
+    player = board.turn
     if (player == chess.WHITE):
         whiteTazes += 1
         ardBoard.digital[WHITE_PIN].write(1)
         time.sleep(0.5)
+        ardBoard.digital[WHITE_PIN].write(0)
 
     else:
         blackTazes += 1
         ardBoard.digital[BLACK_PIN].write(1)
         time.sleep(0.5)
+        ardBoard.digital[WHITE_PIN].write(0)
 
 def main():
+    global badMoveMade
     global pieceStyle
     global boardStyle
     global pieceStyleIndex
@@ -523,8 +559,11 @@ def main():
                     if (chess.Move.from_uci(moveAttempt) in board.legal_moves):
                         #print(moveAttempt)
                         globalPSymbol = ""
-                        
+                        playAudio("move")
                         engineAnalysis(moveAttempt)
+                        if wasBadMove():
+                            print("ya garbage!")
+                            badMove()
                         #drawWindow()
                     else:
                         globalPSymbol = ""
