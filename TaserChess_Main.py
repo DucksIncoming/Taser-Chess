@@ -14,7 +14,7 @@ pygame.font.init()
 # Constant Variables
 WIDTH, HEIGHT = 1920, 1080
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
-FPS_CAP = 60
+FPS_CAP = 165
 BOARD_ORIGIN = (560, 140)
 WHITE_PIN = 9
 BLACK_PIN = 8
@@ -151,11 +151,27 @@ pieces_standard = {
     "b_king": "Assets/Pieces/pieces_standard/standard_Bking.png"
 }
 
+pieces_checkers = {
+    "w_pawn": "Assets/Pieces/pieces_checkers/checkers_Wpawn.png",
+    "w_knight": "Assets/Pieces/pieces_checkers/checkers_Wknight.png",
+    "w_rook": "Assets/Pieces/pieces_checkers/checkers_Wrook.png",
+    "w_bishop": "Assets/Pieces/pieces_checkers/checkers_Wbishop.png",
+    "w_queen": "Assets/Pieces/pieces_checkers/checkers_Wqueen.png",
+    "w_king": "Assets/Pieces/pieces_checkers/checkers_Wking.png",
+    "b_pawn": "Assets/Pieces/pieces_checkers/checkers_Bpawn.png",
+    "b_knight": "Assets/Pieces/pieces_checkers/checkers_Bknight.png",
+    "b_rook": "Assets/Pieces/pieces_checkers/checkers_Brook.png",
+    "b_bishop": "Assets/Pieces/pieces_checkers/checkers_Bbishop.png",
+    "b_queen": "Assets/Pieces/pieces_checkers/checkers_Bqueen.png",
+    "b_king": "Assets/Pieces/pieces_checkers/checkers_Bking.png"
+}
+
 pieceCustomizer = {
     1: "Standard",
     2: "Silhouette",
-    3: "Artistic",
-    4: "Realistic"
+    3: "Checkers",
+    4: "Artistic",
+    5: "Realistic"
 }
 
 # Customization Variables
@@ -241,12 +257,12 @@ def customize():
             elif (mousePos[0] > 1000 and mousePos[0] < 1065):
                 pieceStyleIndex -= 1
                 if (pieceStyleIndex == 0):
-                    pieceStyleIndex = 4
+                    pieceStyleIndex = 5
                 #print(pieceStyleIndex)
             # Piece-Right
             elif (mousePos[0] > 1300 and mousePos[0 < 1365]):
                 pieceStyleIndex += 1
-                if (pieceStyleIndex == 5):
+                if (pieceStyleIndex == 6):
                     pieceStyleIndex = 1
                 #print(pieceStyleIndex)
 
@@ -281,6 +297,8 @@ def drawHeldPiece(pieceSymbol):
             piecePath = pieces_standard.get(pieceSelector, "Assets/Pieces/x.png")
         elif (pieceStyle == "Silhouette"):
             piecePath = pieces_silhouette.get(pieceSelector, "Assets/Pieces/x.png")
+        elif (pieceStyle == "Checkers"):
+            piecePath = pieces_checkers.get(pieceSelector, "Assets/Pieces/x.png")
         elif (pieceStyle == "Artistic"):
             piecePath = pieces_artistic.get(pieceSelector, "Assets/Pieces/x.png")
         else:
@@ -337,7 +355,9 @@ def drawUI():
     WIN.blit(whiteText, (BOARD_ORIGIN[0] + 1050, BOARD_ORIGIN[1]))
     WIN.blit(blackText, (BOARD_ORIGIN[0] + 1050, BOARD_ORIGIN[1] + 720))
 
-    drawSprite("Assets/Icons/customization.png", ((1920/2 - 400), 10), (800, 106))
+    drawSprite("Assets/Icons/customization.png", ((1920/2 - 410), 10), (800, 106))
+    drawSprite("Assets/Boards/Titles/" + boardCustomizer.get(boardStyleIndex) + ".png", ((1920/2 - 350), 45), (250, 75))
+    drawSprite("Assets/Pieces/Titles/" + pieceStyle + ".png", ((1920/2 + 85), 45), (250, 75))
 
 def drawFromFen(fen : str):
     global pieceStyle
@@ -384,6 +404,8 @@ def drawFromFen(fen : str):
                     piecePath = pieces_standard.get(pieceSelector)
                 elif (pieceStyle == "Silhouette"):
                     piecePath = pieces_silhouette.get(pieceSelector)
+                elif (pieceStyle == "Checkers"):
+                    piecePath = pieces_checkers.get(pieceSelector)
                 elif (pieceStyle == "Artistic"):
                     piecePath = pieces_artistic.get(pieceSelector)
                 else:
@@ -501,6 +523,7 @@ def main():
                     if (chess.Move.from_uci(moveAttempt) in board.legal_moves):
                         #print(moveAttempt)
                         globalPSymbol = ""
+                        
                         engineAnalysis(moveAttempt)
                         #drawWindow()
                     else:
