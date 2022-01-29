@@ -366,6 +366,8 @@ class Piece():
         self._pieceList.remove(self)
 
 def drawWindow():
+    pygame.display.set_caption("TaserChess")
+    pygame.display.set_icon(pygame.image.load("Assets/Icons/logo.png"))
     WIN.fill(GRAY)
     #drawSprite(backgrounds.get(board.turn), (0,0))
     drawSprite(boards.get(boardCustomizer.get(boardStyleIndex)), BOARD_ORIGIN)
@@ -463,6 +465,8 @@ def invertIndex(ind : int):
 
 blackTazes = 0
 whiteTazes = 0
+currentlyTazing = False
+tazeTimer = 0
 
 def badMove():
     global whiteTazes
@@ -475,14 +479,12 @@ def badMove():
     if (player == chess.WHITE):
         whiteTazes += 1
         ardBoard.digital[WHITE_PIN].write(1)
-        time.sleep(0.5)
-        ardBoard.digital[WHITE_PIN].write(0)
+        tazeTimer = time.time() * 1000
 
     else:
         blackTazes += 1
         ardBoard.digital[BLACK_PIN].write(1)
-        time.sleep(0.5)
-        ardBoard.digital[WHITE_PIN].write(0)
+        tazeTimer = time.time() * 1000
 
 def main():
     global badMoveMade
@@ -490,6 +492,7 @@ def main():
     global boardStyle
     global pieceStyleIndex
     global boardStyleIndex
+    global tazeTimer
 
     pygame.font.init()
 
@@ -512,6 +515,10 @@ def main():
     boardStyle = boards.get(boardCustomizer.get(boardStyleIndex))
 
     while run:
+        if ((time.time() * 1000) - tazeTimer > 0.5):
+            ardBoard.digital[WHITE_PIN].write(0)
+            ardBoard.digital[BLACK_PIN].write(0)
+
         if (pygame.mouse.get_pressed()[0]):
             customize()
 
