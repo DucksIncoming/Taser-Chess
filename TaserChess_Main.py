@@ -23,6 +23,7 @@ FONT = pygame.font.Font(None, 150)
 
 try:
     ardBoard = Arduino(PORT)
+    print("Ready")
 except:
     print("Arduino board not plugged in! (Or not accessible on specified port)")
     time.sleep(5000)
@@ -42,10 +43,6 @@ GRAY = (30, 30, 30)
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 
-# Customization Variables
-boardStyle = "chesscom"
-pieceStyle = "standard"
-
 # Backgrounds
 backgrounds = {
     True: "Assets/Icons/background_white.png",
@@ -60,18 +57,35 @@ arrows = {
 
 # Boards
 boards = {
-    "beach": "Assets/Boards/board_beach.png",
-    "checkers": "Assets/Boards/board_checkers.png",
-    "chesscom": "Assets/Boards/board_chesscom.png",
-    "chilly": "Assets/Boards/board_chilly.png",
-    "classic": "Assets/Boards/board_classic.png",
-    "headache": "Assets/Boards/board_headache.png",
-    "hell": "Assets/Boards/board_hell.png",
-    "hot": "Assets/Boards/board_hotandsexy.png",
-    "minecraft": "Assets/Boards/board_minecraft.png",
-    "nonstandard": "Assets/Boards/board_nonstandard.png",
-    "soft": "Assets/Boards/board_soft.png",
-    "wood": "Assets/Boards/board_wood.png"
+    "Chess.com": "Assets/Boards/board_chesscom.png",
+    "Beach": "Assets/Boards/board_beach.png",
+    "Checkers": "Assets/Boards/board_checkers.png",
+    "Chilly": "Assets/Boards/board_chilly.png",
+    "Classic": "Assets/Boards/board_classic.png",
+    "Headache": "Assets/Boards/board_headache.png",
+    "Hell": "Assets/Boards/board_hell.png",
+    "Hot": "Assets/Boards/board_hotandsexy.png",
+    "Minecraft": "Assets/Boards/board_minecraft.png",
+    "Soft": "Assets/Boards/board_soft.png",
+    "Wood": "Assets/Boards/board_wood.png",
+    "Void": "Assets/Boards/board_void.png",
+    "Non-Standard": "Assets/Boards/board_nonstandard.png"
+}
+
+boardCustomizer = {
+    1: "Chess.com",
+    2: "Checkers",
+    3: "Beach",
+    4: "Chilly",
+    5: "Classic",
+    6: "Headache",
+    7: "Hell",
+    8: "Hot",
+    9: "Minecraft",
+    10: "Soft",
+    11: "Wood",
+    12: "Void",
+    13: "Non-Standard" 
 }
 
 # Pieces
@@ -137,6 +151,19 @@ pieces_standard = {
     "b_king": "Assets/Pieces/pieces_standard/standard_Bking.png"
 }
 
+pieceCustomizer = {
+    1: "Standard",
+    2: "Silhouette",
+    3: "Artistic",
+    4: "Realistic"
+}
+
+# Customization Variables
+boardStyle = boards.get("Chess.com")
+boardStyleIndex = 1
+pieceStyle = "Standard"
+pieceStyleIndex = 1
+
 def indexToSquare(index : int):
     if (index < 0):
         index = 0
@@ -181,6 +208,44 @@ def getMouseSquare(position : tuple):
     
     return (column * 8) + row
 
+def customize():
+    mousePos = pygame.mouse.get_pos()
+
+    global boardStyleIndex
+    global pieceStyleIndex
+    global pieceStyle
+    global boardStyle
+
+    # Check which button got clicked
+    # drawSprite("Assets/Icons/customization.png", ((1920/2 - 400), 10), (800, 106))
+
+    # Board-Left
+    if (mousePos[1] > 116):
+        if (mousePos[0] > 560 and mousePos[0] < 625):
+            boardStyleIndex -= 1
+            if (boardStyleIndex == 0):
+                boardStyleIndex = 13
+        
+        # Board-Right
+        elif (mousePos[0] > 860 and mousePos[0] < 925):
+            boardStyleIndex += 1
+            if (boardStyleIndex == 14):
+                boardStyleIndex = 1
+
+        # Piece-Left
+        elif (mousePos[0] > 1000 and mousePos[0] < 1065):
+            pieceStyleIndex -= 1
+            if (pieceStyleIndex == 0):
+                pieceStyleIndex = 4
+        # Piece-Right
+        elif (mousePos[0] > 1300 and mousePos[0 < 1365]):
+            pieceStyleIndex += 1
+            if (pieceStyleIndex == 5):
+                pieceStyleIndex = 1
+        
+        pieceStyle = pieceCustomizer.get(pieceStyleIndex)
+        boardStyle = boards.get(boardCustomizer.get(boardStyleIndex))
+    
 
 def drawSprite(imagePath : str, position : tuple = (0, 0), scale : tuple = (0, 0)):
     img = pygame.image.load(imagePath)
@@ -202,11 +267,11 @@ def drawHeldPiece(pieceSymbol):
 
         pieceSelector = pieceSelection + charToPiece.get(pieceSymbol.lower())
 
-        if (pieceStyle == "standard"):
+        if (pieceStyle == "Standard"):
             piecePath = pieces_standard.get(pieceSelector, "Assets/Pieces/x.png")
-        elif (pieceStyle == "silhouette"):
+        elif (pieceStyle == "Silhouette"):
             piecePath = pieces_silhouette.get(pieceSelector, "Assets/Pieces/x.png")
-        elif (pieceStyle == "artistic"):
+        elif (pieceStyle == "Artistic"):
             piecePath = pieces_artistic.get(pieceSelector, "Assets/Pieces/x.png")
         else:
             piecePath = pieces_realistic.get(pieceSelector, "Assets/Pieces/x.png")
@@ -243,12 +308,14 @@ class Piece():
         self._pieceList.remove(self)
 
 def drawWindow():
+    global boardStyle
+    
     WIN.fill(GRAY)
     #drawSprite(backgrounds.get(board.turn), (0,0))
     drawSprite(boards.get(boardStyle), BOARD_ORIGIN)
     drawFromFen(board.fen(shredder=True))
     drawUI()
-    #pygame.display.update()
+    pygame.display.update()
 
 def drawUI():
     whiteText = FONT.render(str(whiteTazes), True, WHITE)
@@ -257,11 +324,16 @@ def drawUI():
     drawSprite("Assets/Icons/text_logo.png", (0, 920), (500, 160))
     drawSprite("Assets/Icons/turn_icons.png", ((BOARD_ORIGIN[0] - 54)/2, 400-291 + BOARD_ORIGIN[1]), (108, 582))
     drawSprite(arrows.get(board.turn), ((BOARD_ORIGIN[0] - 55)/2, 400-85 + BOARD_ORIGIN[1]), (110, 170))
+    
     drawSprite("Assets/Icons/taser_icons.png", ((BOARD_ORIGIN[0] + 900), BOARD_ORIGIN[1]), (90, 800))
     WIN.blit(whiteText, (BOARD_ORIGIN[0] + 1050, BOARD_ORIGIN[1]))
     WIN.blit(blackText, (BOARD_ORIGIN[0] + 1050, BOARD_ORIGIN[1] + 720))
 
+    drawSprite("Assets/Icons/customization.png", ((1920/2 - 400), 10), (800, 106))
+
 def drawFromFen(fen : str):
+    global pieceStyle
+    
     for p in Piece._pieceList:
         p.killPiece()
 
@@ -300,11 +372,11 @@ def drawFromFen(fen : str):
             if (type(pieceSelector) != None):
                 piecePath = ""
 
-                if (pieceStyle == "standard"):
+                if (pieceStyle == "Standard"):
                     piecePath = pieces_standard.get(pieceSelector)
-                elif (pieceStyle == "silhouette"):
+                elif (pieceStyle == "Silhouette"):
                     piecePath = pieces_silhouette.get(pieceSelector)
-                elif (pieceStyle == "artistic"):
+                elif (pieceStyle == "Artistic"):
                     piecePath = pieces_artistic.get(pieceSelector)
                 else:
                     piecePath = pieces_realistic.get(pieceSelector)
@@ -325,6 +397,9 @@ blackTazes = 0
 whiteTazes = 0
 
 def badMove():
+    global whiteTazes
+    global blackTazes
+
     player = not board.turn
     if (player == chess.WHITE):
         whiteTazes += 1
@@ -337,6 +412,11 @@ def badMove():
         time.sleep(0.5)
 
 def main():
+    global pieceStyle
+    global boardStyle
+    global pieceStyleIndex
+    global boardStyleIndex
+
     pygame.font.init()
 
     prevMouseState = False
@@ -352,7 +432,21 @@ def main():
 
     #pygame.display.update()
 
+    pieceStyleIndex = 1
+    boardStyleIndex = 1
+    pieceStyle = "Standard"
+    boardStyle = "Assets/Boards/board_chesscom.png"
+
+
+    pieceStyle = pieceCustomizer.get(pieceStyleIndex)
+    boardStyle = boards.get(boardCustomizer.get(boardStyleIndex))
+
     while run:
+        drawWindow()
+
+        #if (pygame.mouse.get_pressed()[0]):
+            #customize()
+
         pygame.display.set_caption("TaserChess")
         pygame.display.set_icon(pygame.image.load("Assets/Icons/logo.png"))
         clock.tick(FPS_CAP) 
@@ -425,12 +519,11 @@ def main():
         elif (pygame.mouse.get_pressed()[0]):
             prevMouseState = pygame.mouse.get_pressed()[0]
             mousePos = pygame.mouse.get_pos()
-            try:
+            if (globalPSymbol != ""):
                 drawHeldPiece(globalPSymbol)
-            except:
-                print("")
             #print(getMouseSquare(mousePos))
         else:
-            drawHeldPiece(globalPSymbol)
+            if (globalPSymbol != ""):
+                drawHeldPiece(globalPSymbol)
     
     pygame.quit()
