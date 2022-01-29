@@ -20,7 +20,7 @@ WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 FPS_CAP = 165
 BOARD_ORIGIN = (560, 140)
 WHITE_PIN = 9
-BLACK_PIN = 8
+BLACK_PIN = 9
 PORT = "COM6"
 FONT = pygame.font.Font(None, 150)
 
@@ -476,6 +476,7 @@ tazeTimer = 0
 def badMove():
     global whiteTazes
     global blackTazes
+    global tazeTimer
 
     print("White: " + str(whiteTazes))
     print("Black: " + str(blackTazes))
@@ -483,12 +484,12 @@ def badMove():
     player = board.turn
     if (player == chess.WHITE):
         whiteTazes += 1
-        ardBoard.digital[WHITE_PIN].write(5)
+        ardBoard.digital[WHITE_PIN].write(1)
         tazeTimer = time.time() * 1000
 
     else:
         blackTazes += 1
-        ardBoard.digital[BLACK_PIN].write(5)
+        ardBoard.digital[BLACK_PIN].write(1)
         tazeTimer = time.time() * 1000
 
 def main():
@@ -520,7 +521,7 @@ def main():
     boardStyle = boards.get(boardCustomizer.get(boardStyleIndex))
 
     while run:
-        if ((time.time() * 1000) - tazeTimer > 2.5):
+        if ((time.time() * 1000) - tazeTimer > 500):
             ardBoard.digital[WHITE_PIN].write(0)
             ardBoard.digital[BLACK_PIN].write(0)
 
