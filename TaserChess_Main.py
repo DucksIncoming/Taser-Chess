@@ -409,7 +409,7 @@ def drawFromFen(fen : str):
     fen = fen.replace('a','')
     fen = fen.replace('-','')
     fen = fen.replace(' ','')
-    fen = fen[:-1]
+    fen = fen.replace('w','')
 
     #print(fen)
 
@@ -417,32 +417,40 @@ def drawFromFen(fen : str):
         if (fenChar.isdigit()):
             if (referenceIndex + int(fenChar) < 64):
                 referenceIndex += int(fenChar)
-            else:
-                fen = fen[:-1]
             
-        else:
-            if (fenChar.isupper()):
-                pieceSelector = "w_"
-            else:
-                pieceSelector = "b_"
-
-            pieceSelector = pieceSelector +  str(charToPiece.get(fenChar.lower()))
-            if (type(pieceSelector) != None):
-                piecePath = ""
-
-                if (pieceStyle == "Standard"):
-                    piecePath = pieces_standard.get(pieceSelector)
-                elif (pieceStyle == "Silhouette"):
-                    piecePath = pieces_silhouette.get(pieceSelector)
-                elif (pieceStyle == "Checkers"):
-                    piecePath = pieces_checkers.get(pieceSelector)
-                elif (pieceStyle == "Artistic"):
-                    piecePath = pieces_artistic.get(pieceSelector)
+        elif (referenceIndex < 64):
+            if (fenChar != "b" or (fenChar == "b" and board.piece_at(invertIndex(referenceIndex)).symbol() == "b")): # I HATE FEN FORMATTING FUCK YOU
+                if (fenChar.isupper()):
+                    pieceSelector = "w_"
                 else:
-                    piecePath = pieces_realistic.get(pieceSelector)
-                
-                Piece(piecePath, referenceIndex)
-                referenceIndex += 1
+                    pieceSelector = "b_"
+
+                pieceSelector = pieceSelector +  str(charToPiece.get(fenChar.lower()))
+                if (type(pieceSelector) != None):
+                    piecePath = ""
+
+                    if (pieceStyle == "Standard"):
+                        piecePath = pieces_standard.get(pieceSelector)
+                    elif (pieceStyle == "Silhouette"):
+                        piecePath = pieces_silhouette.get(pieceSelector)
+                    elif (pieceStyle == "Checkers"):
+                        piecePath = pieces_checkers.get(pieceSelector)
+                    elif (pieceStyle == "Artistic"):
+                        piecePath = pieces_artistic.get(pieceSelector)
+                    else:
+                        piecePath = pieces_realistic.get(pieceSelector)
+                    
+                    if(piecePath == None):
+                        print("FenChar: " + str(fenChar))
+                        print("piecePath: " + str(piecePath))
+                        print("pieceStyle: " + str(pieceStyle))
+                    Piece(piecePath, referenceIndex)
+                    referenceIndex += 1
+            else:
+                print(referenceIndex)
+                print("base " + board.piece_at(referenceIndex).symbol())
+                print("inverse " + board.piece_at(invertIndex(referenceIndex)).symbol())
+                break
     
 #pygame.display.update()
 def invertIndex(ind : int):
