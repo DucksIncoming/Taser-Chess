@@ -5,14 +5,28 @@ from pyfirmata import Arduino
 from TaserChess_Engine import *
 
 import pygame
+import pygame.font
 import os
 import math
+
+pygame.font.init()
 
 # Constant Variables
 WIDTH, HEIGHT = 1920, 1080
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 FPS_CAP = 60
 BOARD_ORIGIN = (560, 140)
+WHITE_PIN = 9
+BLACK_PIN = 8
+PORT = "COM6"
+FONT = pygame.font.Font(None, 150)
+
+try:
+    ardBoard = Arduino(PORT)
+except:
+    print("Arduino board not plugged in! (Or not accessible on specified port)")
+    time.sleep(5000)
+    quit()
 
 charToPiece = {
         "k": "king",
@@ -25,6 +39,8 @@ charToPiece = {
 
 # Colors
 GRAY = (30, 30, 30)
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
 
 # Customization Variables
 boardStyle = "chesscom"
@@ -235,9 +251,15 @@ def drawWindow():
     #pygame.display.update()
 
 def drawUI():
+    whiteText = FONT.render(str(whiteTazes), True, WHITE)
+    blackText = FONT.render(str(blackTazes), True, WHITE)
+
     drawSprite("Assets/Icons/text_logo.png", (0, 920), (500, 160))
     drawSprite("Assets/Icons/turn_icons.png", ((BOARD_ORIGIN[0] - 54)/2, 400-291 + BOARD_ORIGIN[1]), (108, 582))
     drawSprite(arrows.get(board.turn), ((BOARD_ORIGIN[0] - 55)/2, 400-85 + BOARD_ORIGIN[1]), (110, 170))
+    drawSprite("Assets/Icons/taser_icons.png", ((BOARD_ORIGIN[0] + 900), BOARD_ORIGIN[1]), (90, 800))
+    WIN.blit(whiteText, (BOARD_ORIGIN[0] + 1050, BOARD_ORIGIN[1]))
+    WIN.blit(blackText, (BOARD_ORIGIN[0] + 1050, BOARD_ORIGIN[1] + 720))
 
 def drawFromFen(fen : str):
     for p in Piece._pieceList:
@@ -299,8 +321,24 @@ def invertIndex(ind : int):
     #print(("New: " + str((8 * newFile) + newRank)))
     return (8 * newFile) + newRank
 
+blackTazes = 0
+whiteTazes = 0
+
+def badMove():
+    player = not board.turn
+    if (player == chess.WHITE):
+        whiteTazes += 1
+        ardBoard.digital[WHITE_PIN].write(1)
+        time.sleep(0.5)
+
+    else:
+        blackTazes += 1
+        ardBoard.digital[BLACK_PIN].write(1)
+        time.sleep(0.5)
+
 def main():
-    
+    pygame.font.init()
+
     prevMouseState = False
     clock = pygame.time.Clock()
     run = True
@@ -317,7 +355,7 @@ def main():
     while run:
         pygame.display.set_caption("TaserChess")
         pygame.display.set_icon(pygame.image.load("Assets/Icons/logo.png"))
-        clock.tick(FPS_CAP)
+        clock.tick(FPS_CAP) 
         for event in pygame.event.get():
 
             if event.type == pygame.QUIT:
