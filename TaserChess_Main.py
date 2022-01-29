@@ -162,27 +162,31 @@ def drawSprite(imagePath : str, position : tuple = (0, 0), scale : tuple = (0, 0
     WIN.blit(img, position)
 
 def drawHeldPiece(pieceSymbol):
-    if (pieceSymbol.isupper()):
-        pieceSelection = "b_"
-    else:
-        pieceSelection = "w_"
-
-    pieceSelector = pieceSelection + charToPiece.get(pieceSymbol.lower())
-
-    if (pieceStyle == "standard"):
-        piecePath = pieces_standard.get(pieceSelector)
-    elif (pieceStyle == "silhouette"):
-        piecePath = pieces_silhouette.get(pieceSelector)
-    elif (pieceStyle == "artistic"):
-        piecePath = pieces_artistic.get(pieceSelector)
-    else:
-        piecePath = pieces_realistic.get(pieceSelector)
-
-    img = pygame.image.load(piecePath)
-    img = pygame.transform.scale(img, (100, 100))
-
     drawWindow()
-    WIN.blit(img, ((pygame.mouse.get_pos()[0] - 50), pygame.mouse.get_pos()[1] - 50))
+    if (pieceSymbol != ""):
+        if (pieceSymbol.isupper()):
+            pieceSelection = "w_"
+        else:
+            pieceSelection = "b_"
+
+        #print(pieceSymbol.lower())
+
+        pieceSelector = pieceSelection + charToPiece.get(pieceSymbol.lower())
+
+        if (pieceStyle == "standard"):
+            piecePath = pieces_standard.get(pieceSelector, "Assets/Pieces/x.png")
+        elif (pieceStyle == "silhouette"):
+            piecePath = pieces_silhouette.get(pieceSelector, "Assets/Pieces/x.png")
+        elif (pieceStyle == "artistic"):
+            piecePath = pieces_artistic.get(pieceSelector, "Assets/Pieces/x.png")
+        else:
+            piecePath = pieces_realistic.get(pieceSelector, "Assets/Pieces/x.png")
+        
+        #print(piecePath)
+
+        img = pygame.image.load(piecePath)
+        img = pygame.transform.scale(img, (100, 100))
+        WIN.blit(img, ((pygame.mouse.get_pos()[0] - 50), pygame.mouse.get_pos()[1] - 50))
     pygame.display.update()
 
 class Piece():
@@ -196,7 +200,7 @@ class Piece():
         self.x = indexPosition(indexPos)[0]
         self.y = indexPosition(indexPos)[1]
         self.rect = self.image.get_rect(topleft=(self.x, self.y))
-        self.indexPos = indexPos
+        self.index = indexPos
 
         WIN.blit(self.image, (self.x, self.y))
 
@@ -206,14 +210,23 @@ class Piece():
     def collideCheck(self, mouse):
         return self.rect.collidepoint(mouse)
 
+    def killPiece(self):
+        self._pieceList.remove(self)
+
 def drawWindow():
-    pygame.display.update()
     WIN.fill(GRAY)
     drawSprite(boards.get(boardStyle), BOARD_ORIGIN)
     drawFromFen(board.fen(shredder=True))
-    pygame.display.update()
+    drawUI()
+    #pygame.display.update()
+
+def drawUI():
+    drawSprite("Assets/Icons/text_logo.png", (0, 974), (500, 106))
 
 def drawFromFen(fen : str):
+    for p in Piece._pieceList:
+        p.killPiece()
+
     pieceSelector = ""
     referenceIndex = 0
     
@@ -234,7 +247,10 @@ def drawFromFen(fen : str):
 
     for fenChar in fen:
         if (fenChar.isdigit()):
-            referenceIndex += int(fenChar)
+            if (referenceIndex + int(fenChar) < 64):
+                referenceIndex += int(fenChar)
+            else:
+                fen = fen[:-1]
             
         else:
             if (fenChar.isupper()):
@@ -255,9 +271,20 @@ def drawFromFen(fen : str):
                 else:
                     piecePath = pieces_realistic.get(pieceSelector)
                 
-                Piece(piecePath, referenceIndex)
+                try:
+                    Piece(piecePath, referenceIndex)
+                except:
+                    break
                 referenceIndex += 1
-
+    
+#pygame.display.update()
+def invertIndex(ind : int):
+    #i am so fucking mad that i have to make this
+    newFile = 7 - math.floor(ind / 8)
+    newRank = ind % 8
+    #print("Old: " + str(ind))
+    #print(("New: " + str((8 * newFile) + newRank)))
+    return (8 * newFile) + newRank
 
 def main():
     
@@ -266,36 +293,51 @@ def main():
     run = True
     fromSquare = ""
     toSquare = ""
+    globalPSymbol = ""
+    heldPieceIndex = 0
+    heldPieceIcon = ""
 
+    #drawWindow()
 
-    WIN.fill(GRAY)
-    drawSprite(boards.get(boardStyle), BOARD_ORIGIN)
-    drawFromFen(board.fen(shredder=True))
-
-    pygame.display.update()
+    #pygame.display.update()
 
     while run:
-
+        pygame.display.set_caption("TaserChess")
+        pygame.display.set_icon(pygame.image.load("Assets/Icons/logo.png"))
         clock.tick(FPS_CAP)
         for event in pygame.event.get():
 
             if event.type == pygame.QUIT:
                 run = False
 
-        if (pygame.mouse.get_pressed()[0]):
+        if (pygame.mouse.get_pressed()[0] and not prevMouseState): # Gets the initial square you press down on
             mousePos = pygame.mouse.get_pos()
 
-            if (prevMouseState == False): # Gets the initial square you press down on
-                prevMouseState = True
-                for p in Piece._pieceList:
-                    focusedPiece = p
-                    if (p.collideCheck(mousePos)):
-                        fromSquare = indexToSquare(p.indexPos)
-                        #print(indexToSquare(getMouseSquare(mousePos)))
-                        drawWindow()
-                        print(p.indexPos)
-                        drawHeldPiece(board.piece_at(p.indexPos).symbol())
-                        break
+            prevMouseState = True
+            for p in Piece._pieceList:
+                if (p.collideCheck(mousePos)):
+                    try:
+                        if (board.turn == chess.WHITE):
+                            #print(invertIndex(p.index))
+                            globalPSymbol = board.piece_at(invertIndex(p.index)).symbol()
+                            fromSquare = indexToSquare(p.index)
+                            #print(indexToSquare(getMouseSquare(mousePos)))
+                        else:
+                            # Holy fucking SHIT I have no fucking idea how this works??? does the board index reverse depending
+                            # on who's turn it is????? i spent like four fucking days trying to figure this out this is the dumbest
+                            # shit i have seen in my entire life and i am furious
+                            # (it is probably my fault but still)
+                            #print(invertIndex(p.index))
+                            globalPSymbol = board.piece_at(invertIndex(p.index)).symbol()
+                            fromSquare = indexToSquare(p.index)
+                            #print(indexToSquare(getMouseSquare(mousePos)))
+                        heldPieceIcon = globalPSymbol
+                        heldPieceIndex = invertIndex(p.index)
+
+                        board.remove_piece_at(heldPieceIndex)
+                        drawHeldPiece(globalPSymbol)
+                    except:
+                        globalPSymbol = ""
         elif (not pygame.mouse.get_pressed()[0] and prevMouseState): # Gets the square you let go of your mouse on
             toSquare = indexToSquare(getMouseSquare(mousePos))
             prevMouseState = False
@@ -303,14 +345,40 @@ def main():
             if (fromSquare != toSquare):
                 moveAttempt = fromSquare + toSquare
                 try:
+                    if (heldPieceIcon != ""):
+                            board.set_piece_at(heldPieceIndex, chess.Piece.from_symbol(heldPieceIcon))
+                            heldPieceIcon = ""
                     if (chess.Move.from_uci(moveAttempt) in board.legal_moves):
                         #print(moveAttempt)
+                        globalPSymbol = ""
                         engineAnalysis(moveAttempt)
-                        drawWindow()
+                        #drawWindow()
+                    else:
+                        globalPSymbol = ""
+                        if (heldPieceIcon != ""):
+                            board.set_piece_at(heldPieceIndex, chess.Piece.from_symbol(heldPieceIcon))
+                            heldPieceIcon = ""
                 except:
-                    print("")
-        else:
+                    globalPSymbol = ""
+                    if (heldPieceIcon != ""):
+                        board.set_piece_at(heldPieceIndex, chess.Piece.from_symbol(heldPieceIcon))
+                        heldPieceIcon = ""
+            else:
+                globalPSymbol = ""
+                if (heldPieceIcon != ""):
+                    board.set_piece_at(heldPieceIndex, chess.Piece.from_symbol(heldPieceIcon))
+                    heldPieceIcon = ""
+        elif (pygame.mouse.get_pressed()[0]):
             prevMouseState = pygame.mouse.get_pressed()[0]
-            drawWindow()
+            mousePos = pygame.mouse.get_pos()
+            try:
+                drawHeldPiece(globalPSymbol)
+            except:
+                drawWindow()
+                pygame.display.update()
+            #print(getMouseSquare(mousePos))
+        else:
+            drawHeldPiece(globalPSymbol)
+            pygame.display.update()
     
     pygame.quit()
