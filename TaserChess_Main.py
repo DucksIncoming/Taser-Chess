@@ -208,6 +208,8 @@ def getMouseSquare(position : tuple):
     
     return (column * 8) + row
 
+customizeDelay = time.time()
+
 def customize():
     mousePos = pygame.mouse.get_pos()
 
@@ -215,36 +217,44 @@ def customize():
     global pieceStyleIndex
     global pieceStyle
     global boardStyle
+    global customizeDelay
 
-    # Check which button got clicked
-    # drawSprite("Assets/Icons/customization.png", ((1920/2 - 400), 10), (800, 106))
+    if (time.time() - customizeDelay > 0.1):
+        customizeDelay = time.time()
+        #print(mousePos)
+        # Check which button got clicked
 
-    # Board-Left
-    if (mousePos[1] > 116):
-        if (mousePos[0] > 560 and mousePos[0] < 625):
-            boardStyleIndex -= 1
-            if (boardStyleIndex == 0):
-                boardStyleIndex = 13
-        
-        # Board-Right
-        elif (mousePos[0] > 860 and mousePos[0] < 925):
-            boardStyleIndex += 1
-            if (boardStyleIndex == 14):
-                boardStyleIndex = 1
+        # Board-Left
+        if (mousePos[1] < 116):
+            if (mousePos[0] > 560 and mousePos[0] < 625):
+                boardStyleIndex -= 1
+                if (boardStyleIndex == 0):
+                    boardStyleIndex = 13
+            
+            # Board-Right
+            elif (mousePos[0] > 860 and mousePos[0] < 925):
+                boardStyleIndex += 1
+                if (boardStyleIndex == 14):
+                    boardStyleIndex = 1
 
-        # Piece-Left
-        elif (mousePos[0] > 1000 and mousePos[0] < 1065):
-            pieceStyleIndex -= 1
-            if (pieceStyleIndex == 0):
-                pieceStyleIndex = 4
-        # Piece-Right
-        elif (mousePos[0] > 1300 and mousePos[0 < 1365]):
-            pieceStyleIndex += 1
-            if (pieceStyleIndex == 5):
-                pieceStyleIndex = 1
-        
-        pieceStyle = pieceCustomizer.get(pieceStyleIndex)
-        boardStyle = boards.get(boardCustomizer.get(boardStyleIndex))
+            # Piece-Left
+            elif (mousePos[0] > 1000 and mousePos[0] < 1065):
+                pieceStyleIndex -= 1
+                if (pieceStyleIndex == 0):
+                    pieceStyleIndex = 4
+                #print(pieceStyleIndex)
+            # Piece-Right
+            elif (mousePos[0] > 1300 and mousePos[0 < 1365]):
+                pieceStyleIndex += 1
+                if (pieceStyleIndex == 5):
+                    pieceStyleIndex = 1
+                #print(pieceStyleIndex)
+
+            
+            #print("Working2!")
+            
+            pieceStyle = pieceCustomizer.get(pieceStyleIndex)
+            boardStyle = boardCustomizer.get(boardStyleIndex)
     
 
 def drawSprite(imagePath : str, position : tuple = (0, 0), scale : tuple = (0, 0)):
@@ -308,11 +318,9 @@ class Piece():
         self._pieceList.remove(self)
 
 def drawWindow():
-    global boardStyle
-    
     WIN.fill(GRAY)
     #drawSprite(backgrounds.get(board.turn), (0,0))
-    drawSprite(boards.get(boardStyle), BOARD_ORIGIN)
+    drawSprite(boards.get(boardCustomizer.get(boardStyleIndex)), BOARD_ORIGIN)
     drawFromFen(board.fen(shredder=True))
     drawUI()
     pygame.display.update()
@@ -434,18 +442,12 @@ def main():
 
     pieceStyleIndex = 1
     boardStyleIndex = 1
-    pieceStyle = "Standard"
-    boardStyle = "Assets/Boards/board_chesscom.png"
-
-
     pieceStyle = pieceCustomizer.get(pieceStyleIndex)
     boardStyle = boards.get(boardCustomizer.get(boardStyleIndex))
 
     while run:
-        drawWindow()
-
-        #if (pygame.mouse.get_pressed()[0]):
-            #customize()
+        if (pygame.mouse.get_pressed()[0]):
+            customize()
 
         pygame.display.set_caption("TaserChess")
         pygame.display.set_icon(pygame.image.load("Assets/Icons/logo.png"))
@@ -525,5 +527,7 @@ def main():
         else:
             if (globalPSymbol != ""):
                 drawHeldPiece(globalPSymbol)
+            else:
+                drawWindow()
     
     pygame.quit()
