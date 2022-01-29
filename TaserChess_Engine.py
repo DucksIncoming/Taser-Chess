@@ -7,9 +7,11 @@ engine = chess.engine.SimpleEngine.popen_uci(r"stockfish_14.1_win_x64_avx2\stock
 
 board = chess.Board()
 
+INFINITY = 9999999
+
 # Keep depth the same for both searches to avoid weirdness
 # Depth is arbitrary but lower depths are more forgiving to players
-searchDepth = 10
+searchDepth = 12
 
 referenceScore = 0
 newScore = 0
@@ -24,10 +26,21 @@ def engineAnalysis(moveAttempt):
     
         # Get a score for the initial position to compare the new score after a move to
         if (board.turn):
-            referenceScore = info["score"].white().score()
+            if (str(info["score"].white()) == "#-1"):
+                referenceScore = -INFINITY
+            elif (str(info["score"].white()) == "#+1"):
+                referenceScore = INFINITY
+            else:
+                referenceScore = info["score"].white().score()
+
             print("White's turn:")
         else:
-            referenceScore = info["score"].black().score()
+            if (str(info["score"].black()) == "#-1"):
+                referenceScore = -INFINITY
+            elif (str(info["score"].black()) == "#+1"):
+                referenceScore = INFINITY
+            else:
+                referenceScore = info["score"].black().score()
             print("Black's turn:")
     
         if ((chess.Move.from_uci(moveAttempt) in board.legal_moves) and (board.color_at(chess.parse_square(moveAttempt[0:2])) == board.turn)):
@@ -37,11 +50,25 @@ def engineAnalysis(moveAttempt):
             info = engine.analyse(board, chess.engine.Limit(depth=searchDepth))
             
             # Fucky weirdness because stockfish returns EVERYTHING as an object
+
+            print(info["score"].white())
+            print(info["score"].black())
+
             if (not board.turn):
-                newScore = info["score"].white().score()
+                if (str(info["score"].white())[:-1] == "#-"):
+                    newScore = -INFINITY
+                elif (str(info["score"].black())[:-1] == "#+"):
+                    newScore= INFINITY
+                else:
+                    newScore = info["score"].white().score()
             else:
-                newScore = info["score"].black().score()
-            print(newScore)
+                if (str(info["score"].black())[:-1] == "#-"):
+                    newScore = -INFINITY
+                elif (str(info["score"].black())[:-1] == "#+"):
+                    newScore= INFINITY
+                else:
+                    newScore = info["score"].black().score()
+            #print(newScore)
 
             print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
             print(board)
@@ -53,11 +80,11 @@ def engineAnalysis(moveAttempt):
                 # Doesn't return infinity/-infinity so I have to do this fucky shit or edit source code so
                 print("Diff: Checkmate/Fail Move")
 
-            # Check how bad the move is. 300 is the threshold, equal to roughly 3 pawns. The value
-            # is completely arbitrary, higher threshholds cause tazing less often, lower thresholds
-            # cause tazing more often. Keep it above 100/200 or it'll taze with basically every move.
+            # Check how bad the move is. 400 is the threshold, equal to roughly 4 pawns. The value
+            # is completely arbitrary, higher threshold means tazing happens less often, lower threshold means
+            # tazing happens more often. I'd keep it arouund where it is. 
             try:
-                if (-(newScore - referenceScore) > 300):
+                if (abs(newScore - referenceScore) > 400):
                     print("Bad Move\n")
                     badMoveMade = True
                 else:
@@ -68,12 +95,11 @@ def engineAnalysis(moveAttempt):
             print("Move is not legal. Please retry.")
         
         if (board.is_game_over()):
-            try:
-                print(board.winner())
-            except:
-                print("Draw")
+            
+            print(board.winner())
     else:
         engine.quit()
+        print("Game Over")
 
 def wasBadMove():
     global badMoveMade

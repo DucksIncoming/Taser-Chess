@@ -265,7 +265,7 @@ def customize():
     global boardStyle
     global customizeDelay
 
-    if (time.time() - customizeDelay > 0.1):
+    if (time.time() - customizeDelay > 0.3):
         customizeDelay = time.time()
         #print(mousePos)
         # Check which button got clicked
@@ -276,25 +276,27 @@ def customize():
                 boardStyleIndex -= 1
                 if (boardStyleIndex == 0):
                     boardStyleIndex = 13
+                print(boardStyleIndex)
             
             # Board-Right
             elif (mousePos[0] > 860 and mousePos[0] < 925):
                 boardStyleIndex += 1
                 if (boardStyleIndex == 14):
                     boardStyleIndex = 1
+                print(boardStyleIndex)
 
             # Piece-Left
             elif (mousePos[0] > 1000 and mousePos[0] < 1065):
                 pieceStyleIndex -= 1
                 if (pieceStyleIndex == 0):
                     pieceStyleIndex = 5
-                #print(pieceStyleIndex)
+                print(pieceStyleIndex)
             # Piece-Right
             elif (mousePos[0] > 1300 and mousePos[0 < 1365]):
                 pieceStyleIndex += 1
                 if (pieceStyleIndex == 6):
                     pieceStyleIndex = 1
-                #print(pieceStyleIndex)
+                print(pieceStyleIndex)
 
             
             #print("Working2!")
@@ -421,37 +423,40 @@ def drawFromFen(fen : str):
                 referenceIndex += int(fenChar)
             
         elif (referenceIndex < 64):
-            if (fenChar != "b" or (fenChar == "b" and board.piece_at(invertIndex(referenceIndex)).symbol() == "b")): # I HATE FEN FORMATTING FUCK YOU
-                if (fenChar.isupper()):
-                    pieceSelector = "w_"
-                else:
-                    pieceSelector = "b_"
-
-                pieceSelector = pieceSelector +  str(charToPiece.get(fenChar.lower()))
-                if (type(pieceSelector) != None):
-                    piecePath = ""
-
-                    if (pieceStyle == "Standard"):
-                        piecePath = pieces_standard.get(pieceSelector)
-                    elif (pieceStyle == "Silhouette"):
-                        piecePath = pieces_silhouette.get(pieceSelector)
-                    elif (pieceStyle == "Checkers"):
-                        piecePath = pieces_checkers.get(pieceSelector)
-                    elif (pieceStyle == "Artistic"):
-                        piecePath = pieces_artistic.get(pieceSelector)
+            try:
+                if (fenChar != "b" or (fenChar == "b" and board.piece_at(invertIndex(referenceIndex)).symbol() == "b")): # I HATE FEN FORMATTING FUCK YOU
+                    if (fenChar.isupper()):
+                        pieceSelector = "w_"
                     else:
-                        piecePath = pieces_realistic.get(pieceSelector)
-                    
-                    if(piecePath == None):
-                        print("FenChar: " + str(fenChar))
-                        print("piecePath: " + str(piecePath))
-                        print("pieceStyle: " + str(pieceStyle))
-                    Piece(piecePath, referenceIndex)
-                    referenceIndex += 1
-            else:
-                print(referenceIndex)
-                print("base " + board.piece_at(referenceIndex).symbol())
-                print("inverse " + board.piece_at(invertIndex(referenceIndex)).symbol())
+                        pieceSelector = "b_"
+
+                    pieceSelector = pieceSelector +  str(charToPiece.get(fenChar.lower()))
+                    if (type(pieceSelector) != None):
+                        piecePath = ""
+
+                        if (pieceStyle == "Standard"):
+                            piecePath = pieces_standard.get(pieceSelector)
+                        elif (pieceStyle == "Silhouette"):
+                            piecePath = pieces_silhouette.get(pieceSelector)
+                        elif (pieceStyle == "Checkers"):
+                            piecePath = pieces_checkers.get(pieceSelector)
+                        elif (pieceStyle == "Artistic"):
+                            piecePath = pieces_artistic.get(pieceSelector)
+                        else:
+                            piecePath = pieces_realistic.get(pieceSelector)
+                        
+                        if(piecePath == None):
+                            print("FenChar: " + str(fenChar))
+                            print("piecePath: " + str(piecePath))
+                            print("pieceStyle: " + str(pieceStyle))
+                        Piece(piecePath, referenceIndex)
+                        referenceIndex += 1
+                else:
+                    print(referenceIndex)
+                    print("base " + board.piece_at(referenceIndex).symbol())
+                    print("inverse " + board.piece_at(invertIndex(referenceIndex)).symbol())
+                    break
+            except:
                 break
     
 #pygame.display.update()
@@ -478,12 +483,12 @@ def badMove():
     player = board.turn
     if (player == chess.WHITE):
         whiteTazes += 1
-        ardBoard.digital[WHITE_PIN].write(1)
+        ardBoard.digital[WHITE_PIN].write(5)
         tazeTimer = time.time() * 1000
 
     else:
         blackTazes += 1
-        ardBoard.digital[BLACK_PIN].write(1)
+        ardBoard.digital[BLACK_PIN].write(5)
         tazeTimer = time.time() * 1000
 
 def main():
@@ -515,7 +520,7 @@ def main():
     boardStyle = boards.get(boardCustomizer.get(boardStyleIndex))
 
     while run:
-        if ((time.time() * 1000) - tazeTimer > 0.5):
+        if ((time.time() * 1000) - tazeTimer > 2.5):
             ardBoard.digital[WHITE_PIN].write(0)
             ardBoard.digital[BLACK_PIN].write(0)
 
