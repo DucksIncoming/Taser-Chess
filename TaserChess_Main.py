@@ -19,7 +19,7 @@ WIDTH, HEIGHT = 1920, 1080
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 FPS_CAP = 165
 BOARD_ORIGIN = (560, 140)
-WHITE_PIN = 9
+WHITE_PIN = 8
 BLACK_PIN = 9
 PORT = "COM6"
 FONT = pygame.font.Font(None, 150)
@@ -189,20 +189,15 @@ moveAudio = {
 }
 
 def playAudio(cue):
-    if (cue == "move"):
-        randomAudio = random.choice([1, 2, 3, 4, 5, 6, 7, 8])
-        print(randomAudio)
-        mixer.music.load(moveAudio.get(randomAudio))
-        mixer.music.play()
-    elif (cue == "check"):
-        mixer.music.load("Assets/Audio/check.wav")
-        mixer.music.play()
-    elif (cue == "draw"):
-        mixer.music.load("Assets/Audio/draw.wav")
-        mixer.music.play()
-    else:
-        mixer.music.load("Assets/Audio/win.wav")
-        mixer.music.play()
+    cueSwitch = {
+        "check": "Assets/Audio/check.wav",
+        "draw": "Assets/Audio/draw.wav",
+        "win": "Assets/Audio/win.wav",
+        "move": "Assets/Audio/move" + random.choice(["1", "2", "3", "4", "5", "6", "7", "8"]) + ".wav"
+    }
+
+    mixer.music.load(cueSwitch.get(cue))
+    mixer.music.play()
 
 # Customization Variables
 boardStyle = boards.get("Chess.com")
@@ -211,10 +206,6 @@ pieceStyle = "Standard"
 pieceStyleIndex = 1
 
 def indexToSquare(index : int):
-    if (index < 0):
-        index = 0
-    if (index > 63):
-        index = 63
 
     fileList = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
     rankList = ['1', '2', '3', '4', '5', '6', '7', '8']
@@ -225,10 +216,6 @@ def indexToSquare(index : int):
     return (fileList[row] + rankList[column])
 
 def indexPosition(index : int):
-    if (index < 0):
-        index = 0
-    if (index > 63):
-        index = 63
     
     column = math.floor(index / 8)
     row = index % 8
@@ -265,83 +252,77 @@ def customize():
     global boardStyle
     global customizeDelay
 
-    if (time.time() - customizeDelay > 0.3):
-        customizeDelay = time.time()
-        #print(mousePos)
-        # Check which button got clicked
+    #print(mousePos)
+    # Check which button got clicked
 
-        # Board-Left
-        if (mousePos[1] < 116):
-            if (mousePos[0] > 560 and mousePos[0] < 625):
-                boardStyleIndex -= 1
-                if (boardStyleIndex == 0):
-                    boardStyleIndex = 13
-                print(boardStyleIndex)
-            
-            # Board-Right
-            elif (mousePos[0] > 860 and mousePos[0] < 925):
-                boardStyleIndex += 1
-                if (boardStyleIndex == 14):
-                    boardStyleIndex = 1
-                print(boardStyleIndex)
+    # Board-Left
+    if (mousePos[1] < 116):
+        if (mousePos[0] > 560 and mousePos[0] < 625):
+            boardStyleIndex -= 1
+            if (boardStyleIndex == 0):
+                boardStyleIndex = 13
+            #print(boardStyleIndex)
+        
+        # Board-Right
+        elif (mousePos[0] > 860 and mousePos[0] < 925):
+            boardStyleIndex += 1
+            if (boardStyleIndex == 14):
+                boardStyleIndex = 1
+            #print(boardStyleIndex)
 
-            # Piece-Left
-            elif (mousePos[0] > 1000 and mousePos[0] < 1065):
-                pieceStyleIndex -= 1
-                if (pieceStyleIndex == 0):
-                    pieceStyleIndex = 5
-                print(pieceStyleIndex)
-            # Piece-Right
-            elif (mousePos[0] > 1300 and mousePos[0 < 1365]):
-                pieceStyleIndex += 1
-                if (pieceStyleIndex == 6):
-                    pieceStyleIndex = 1
-                print(pieceStyleIndex)
+        # Piece-Left
+        elif (mousePos[0] > 1000 and mousePos[0] < 1065):
+            pieceStyleIndex -= 1
+            if (pieceStyleIndex == 0):
+                pieceStyleIndex = 5
+            #print(pieceStyleIndex)
+        # Piece-Right
+        elif (mousePos[0] > 1300 and mousePos[0 < 1365]):
+            pieceStyleIndex += 1
+            if (pieceStyleIndex == 6):
+                pieceStyleIndex = 1
+            #print(pieceStyleIndex)
 
-            
-            #print("Working2!")
-            
-            pieceStyle = pieceCustomizer.get(pieceStyleIndex)
-            boardStyle = boardCustomizer.get(boardStyleIndex)
-    
+        
+        #print("Working2!")
+        
+        pieceStyle = pieceCustomizer.get(pieceStyleIndex)
+        boardStyle = boardCustomizer.get(boardStyleIndex)
 
-def drawSprite(imagePath : str, position : tuple = (0, 0), scale : tuple = (0, 0)):
+def drawSprite(imagePath : str, position : tuple = (0, 0), scale : tuple = (-1, -1)):
     img = pygame.image.load(imagePath)
-    if (scale != (0, 0)):
+    try:
         img = pygame.transform.scale(img, scale)
-    
-    WIN.blit(img, position)
+        WIN.blit(img, position)
+    except:
+        WIN.blit(img, position)
 
 def drawHeldPiece(pieceSymbol):
     drawWindow()
-    pieceSelection = ""
-    if (pieceSymbol != ""):
-        if (pieceSymbol.isupper()):
-            pieceSelection = "w_"
-        else:
-            pieceSelection = "b_"
 
-        #print(pieceSymbol.lower())
+    pieceStyleSwitcher = {
+        "Standard": pieces_standard,
+        "Silhouette": pieces_silhouette,
+        "Checkers": pieces_checkers,
+        "Artistic": pieces_artistic,
+        "Realistic": pieces_realistic
+    }
 
-        pieceSelector = pieceSelection + charToPiece.get(pieceSymbol.lower())
+    piecePrefix = ["w_","b_"]
 
-        if (pieceStyle == "Standard"):
-            piecePath = pieces_standard.get(pieceSelector, "Assets/Pieces/x.png")
-        elif (pieceStyle == "Silhouette"):
-            piecePath = pieces_silhouette.get(pieceSelector, "Assets/Pieces/x.png")
-        elif (pieceStyle == "Checkers"):
-            piecePath = pieces_checkers.get(pieceSelector, "Assets/Pieces/x.png")
-        elif (pieceStyle == "Artistic"):
-            piecePath = pieces_artistic.get(pieceSelector, "Assets/Pieces/x.png")
-        else:
-            piecePath = pieces_realistic.get(pieceSelector, "Assets/Pieces/x.png")
-        
-        #print(piecePath)
+    try:
+        pieceSelector = piecePrefix[pieceSymbol.islower()] + charToPiece.get(pieceSymbol.lower())
+
+        piecePath = (pieceStyleSwitcher.get(pieceStyle)).get(pieceSelector)
 
         img = pygame.image.load(piecePath)
         img = pygame.transform.scale(img, (100, 100))
         WIN.blit(img, ((pygame.mouse.get_pos()[0] - 50), pygame.mouse.get_pos()[1] - 50))
-    pygame.display.update()
+        
+        pygame.display.update()
+    
+    except:
+        pygame.display.update()
 
 class Piece():
     _pieceList = []
@@ -393,6 +374,14 @@ def drawUI():
     drawSprite("Assets/Boards/Titles/" + boardCustomizer.get(boardStyleIndex) + ".png", ((1920/2 - 350), 45), (250, 75))
     drawSprite("Assets/Pieces/Titles/" + pieceStyle + ".png", ((1920/2 + 85), 45), (250, 75))
 
+def invertIndex(ind : int):
+    #i am so fucking mad that i have to make this
+    newFile = 7 - math.floor(ind / 8)
+    newRank = ind % 8
+    #print("Old: " + str(ind))
+    #print(("New: " + str((8 * newFile) + newRank)))
+    return (8 * newFile) + newRank
+
 def drawFromFen(fen : str):
     global pieceStyle
     
@@ -418,79 +407,59 @@ def drawFromFen(fen : str):
     #print(fen)
 
     for fenChar in fen:
-        if (fenChar.isdigit()):
-            if (referenceIndex + int(fenChar) < 64):
-                referenceIndex += int(fenChar)
+        try: # If the char is an integer skip through the reference index
+            referenceIndex += int(fenChar)
+            #print("THIS SHIT: " + str(int("testing")))
             
-        elif (referenceIndex < 64):
+        except:
             try:
                 if (fenChar != "b" or (fenChar == "b" and board.piece_at(invertIndex(referenceIndex)).symbol() == "b")): # I HATE FEN FORMATTING FUCK YOU
-                    if (fenChar.isupper()):
-                        pieceSelector = "w_"
-                    else:
-                        pieceSelector = "b_"
+                    pieceStyleSwitcher = {
+                    "Standard": pieces_standard,
+                    "Silhouette": pieces_silhouette,
+                    "Checkers": pieces_checkers,
+                    "Artistic": pieces_artistic,
+                    "Realistic": pieces_realistic
+                    }
 
-                    pieceSelector = pieceSelector +  str(charToPiece.get(fenChar.lower()))
-                    if (type(pieceSelector) != None):
-                        piecePath = ""
+                    piecePrefix = ["w_","b_"]
+                    pieceSymbol = fenChar
 
-                        if (pieceStyle == "Standard"):
-                            piecePath = pieces_standard.get(pieceSelector)
-                        elif (pieceStyle == "Silhouette"):
-                            piecePath = pieces_silhouette.get(pieceSelector)
-                        elif (pieceStyle == "Checkers"):
-                            piecePath = pieces_checkers.get(pieceSelector)
-                        elif (pieceStyle == "Artistic"):
-                            piecePath = pieces_artistic.get(pieceSelector)
-                        else:
-                            piecePath = pieces_realistic.get(pieceSelector)
-                        
-                        if(piecePath == None):
-                            print("FenChar: " + str(fenChar))
-                            print("piecePath: " + str(piecePath))
-                            print("pieceStyle: " + str(pieceStyle))
-                        Piece(piecePath, referenceIndex)
-                        referenceIndex += 1
+                    pieceSelector = piecePrefix[pieceSymbol.islower()] + charToPiece.get(pieceSymbol.lower())
+                    piecePath = (pieceStyleSwitcher.get(pieceStyle)).get(pieceSelector)
+
+                    Piece(piecePath, referenceIndex)
+                    referenceIndex += 1
+
                 else:
-                    print(referenceIndex)
-                    print("base " + board.piece_at(referenceIndex).symbol())
-                    print("inverse " + board.piece_at(invertIndex(referenceIndex)).symbol())
                     break
             except:
-                break
-    
-#pygame.display.update()
-def invertIndex(ind : int):
-    #i am so fucking mad that i have to make this
-    newFile = 7 - math.floor(ind / 8)
-    newRank = ind % 8
-    #print("Old: " + str(ind))
-    #print(("New: " + str((8 * newFile) + newRank)))
-    return (8 * newFile) + newRank
+                referenceIndex += 0
 
 blackTazes = 0
 whiteTazes = 0
 currentlyTazing = False
-tazeTimer = 0
+whiteTazeTimer = 0
+blackTazeTimer = 0
 
 def badMove():
     global whiteTazes
     global blackTazes
-    global tazeTimer
+    global whiteTazeTimer
+    global blackTazeTimer
 
-    print("White: " + str(whiteTazes))
-    print("Black: " + str(blackTazes))
+    #print("White: " + str(whiteTazes))
+    #print("Black: " + str(blackTazes))
 
-    player = board.turn
-    if (player == chess.WHITE):
-        whiteTazes += 1
-        ardBoard.digital[WHITE_PIN].write(1)
-        tazeTimer = time.time() * 1000
+    player = not board.turn
 
-    else:
-        blackTazes += 1
-        ardBoard.digital[BLACK_PIN].write(1)
-        tazeTimer = time.time() * 1000
+    blackTazes += 1 * (int(player))
+    ardBoard.digital[WHITE_PIN].write(int(player))
+    whiteTazeTimer = time.time() * 1000 * int(player)
+
+    whiteTazes += (int(not player))
+    ardBoard.digital[BLACK_PIN].write(int(not player))
+    blackTazeTimer = time.time() * 1000 * (int(not player))
 
 def main():
     global badMoveMade
@@ -521,53 +490,63 @@ def main():
     boardStyle = boards.get(boardCustomizer.get(boardStyleIndex))
 
     while run:
-        if ((time.time() * 1000) - tazeTimer > 300):
-            ardBoard.digital[WHITE_PIN].write(0)
-            ardBoard.digital[BLACK_PIN].write(0)
+ 
+        # Clamps the floor of delta milliseconds divided by 300. Essentially just writes 1 if delta ms is under 300 and 0 if over
+        whiteTazeWrite = 1 - max(0, min(1, (math.floor((time.time() * 1000 - whiteTazeTimer) / 300))))
+        blackTazeWrite = 1 - max(0, min(1, (math.floor((time.time() * 1000 - blackTazeTimer) / 300))))
 
-        if (pygame.mouse.get_pressed()[0]):
-            customize()
+        #print(blackTazeWrite)
+
+        ardBoard.digital[WHITE_PIN].write(whiteTazeWrite)
+        ardBoard.digital[BLACK_PIN].write(blackTazeWrite)          
 
         pygame.display.set_caption("TaserChess")
         pygame.display.set_icon(pygame.image.load("Assets/Icons/logo.png"))
-        clock.tick(FPS_CAP) 
+
         for event in pygame.event.get():
 
             if event.type == pygame.QUIT:
                 run = False
 
-        if (pygame.mouse.get_pressed()[0] and not prevMouseState): # Gets the initial square you press down on
-            mousePos = pygame.mouse.get_pos()
+        if (pygame.mouse.get_pressed()[0]):
+            if (not prevMouseState): # Gets the initial square you press down on
+            
+                customize()
+                
+                mousePos = pygame.mouse.get_pos()
 
-            prevMouseState = True
-            for p in Piece._pieceList:
-                if (p.collideCheck(mousePos)):
-                    try:
-                        if (board.turn == chess.WHITE):
-                            #print(invertIndex(p.index))
-                            globalPSymbol = board.piece_at(invertIndex(p.index)).symbol()
-                            fromSquare = indexToSquare(p.index)
-                            #print(indexToSquare(getMouseSquare(mousePos)))
-                        else:
-                            # Holy fucking SHIT I have no fucking idea how this works??? does the board index reverse depending
-                            # on who's turn it is????? i spent like four fucking days trying to figure this out this is the dumbest
-                            # shit i have seen in my entire life and i am furious
-                            # (it is probably my fault but still)
-                            #print(invertIndex(p.index))
-                            globalPSymbol = board.piece_at(invertIndex(p.index)).symbol()
-                            fromSquare = indexToSquare(p.index)
-                            #print(indexToSquare(getMouseSquare(mousePos)))
-                        heldPieceIcon = globalPSymbol
-                        heldPieceIndex = invertIndex(p.index)
-
-                        board.remove_piece_at(heldPieceIndex)
-                        drawHeldPiece(globalPSymbol)
-                    except:
+                prevMouseState = True
+                for p in Piece._pieceList:
+                    if (p.collideCheck(mousePos)):
                         try:
+                            if (board.turn == chess.WHITE):
+                                #print(invertIndex(p.index))
+                                globalPSymbol = board.piece_at(invertIndex(p.index)).symbol()
+                                fromSquare = indexToSquare(p.index)
+                                #print(indexToSquare(getMouseSquare(mousePos)))
+                            else:
+                                globalPSymbol = board.piece_at(invertIndex(p.index)).symbol()
+                                fromSquare = indexToSquare(p.index)
+                                #print(indexToSquare(getMouseSquare(mousePos)))
+                            heldPieceIcon = globalPSymbol
+                            heldPieceIndex = invertIndex(p.index)
+
+                            board.remove_piece_at(heldPieceIndex)
                             drawHeldPiece(globalPSymbol)
                         except:
-                            globalPSymbol = ""
-        elif (not pygame.mouse.get_pressed()[0] and prevMouseState): # Gets the square you let go of your mouse on
+                            try:
+                                drawHeldPiece(globalPSymbol)
+                            except:
+                                globalPSymbol = ""
+            else:
+                prevMouseState = pygame.mouse.get_pressed()[0]
+                mousePos = pygame.mouse.get_pos()
+                try:
+                    drawHeldPiece(globalPSymbol)
+                except:
+                    drawWindow()
+                #print(getMouseSquare(mousePos))
+        elif (prevMouseState): # Gets the square you let go of your mouse on
             toSquare = indexToSquare(getMouseSquare(mousePos))
             prevMouseState = False
 
@@ -582,35 +561,32 @@ def main():
                         globalPSymbol = ""
                         playAudio("move")
                         engineAnalysis(moveAttempt)
+
                         if wasBadMove():
-                            print("ya garbage!")
+                            print("ya garbage!")         
                             badMove()
                         #drawWindow()
                     else:
                         globalPSymbol = ""
-                        if (heldPieceIcon != ""):
+                        try:
                             board.set_piece_at(heldPieceIndex, chess.Piece.from_symbol(heldPieceIcon))
                             heldPieceIcon = ""
+                        except:
+                            continue
                 except:
                     globalPSymbol = ""
-                    if (heldPieceIcon != ""):
+                    try:
                         board.set_piece_at(heldPieceIndex, chess.Piece.from_symbol(heldPieceIcon))
                         heldPieceIcon = ""
+                    except:
+                        continue
             else:
                 globalPSymbol = ""
-                if (heldPieceIcon != ""):
-                    board.set_piece_at(heldPieceIndex, chess.Piece.from_symbol(heldPieceIcon))
-                    heldPieceIcon = ""
-        elif (pygame.mouse.get_pressed()[0]):
-            prevMouseState = pygame.mouse.get_pressed()[0]
-            mousePos = pygame.mouse.get_pos()
-            if (globalPSymbol != ""):
-                drawHeldPiece(globalPSymbol)
-            #print(getMouseSquare(mousePos))
+                #if (heldPieceIcon != ""):
+                board.set_piece_at(heldPieceIndex, chess.Piece.from_symbol(heldPieceIcon))
+                heldPieceIcon = ""
         else:
-            if (globalPSymbol != ""):
-                drawHeldPiece(globalPSymbol)
-            else:
-                drawWindow()
-    
+            drawWindow()
+        clock.tick(FPS_CAP)
+
     pygame.quit()

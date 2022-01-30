@@ -1,1 +1,1 @@
-python TaserChess.py
+python main.py

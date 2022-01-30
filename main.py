@@ -1,3 +1,3 @@
-from TaserChess_Main_Refactoring import *
+from TaserChess_Main import *
 
 main()
