@@ -508,36 +508,45 @@ def main():
             if event.type == pygame.QUIT:
                 run = False
 
-        if (pygame.mouse.get_pressed()[0] and not prevMouseState): # Gets the initial square you press down on
+        if (pygame.mouse.get_pressed()[0]):
+            if (not prevMouseState): # Gets the initial square you press down on
             
-            customize()
-            
-            mousePos = pygame.mouse.get_pos()
+                customize()
+                
+                mousePos = pygame.mouse.get_pos()
 
-            prevMouseState = True
-            for p in Piece._pieceList:
-                if (p.collideCheck(mousePos)):
-                    try:
-                        if (board.turn == chess.WHITE):
-                            #print(invertIndex(p.index))
-                            globalPSymbol = board.piece_at(invertIndex(p.index)).symbol()
-                            fromSquare = indexToSquare(p.index)
-                            #print(indexToSquare(getMouseSquare(mousePos)))
-                        else:
-                            globalPSymbol = board.piece_at(invertIndex(p.index)).symbol()
-                            fromSquare = indexToSquare(p.index)
-                            #print(indexToSquare(getMouseSquare(mousePos)))
-                        heldPieceIcon = globalPSymbol
-                        heldPieceIndex = invertIndex(p.index)
-
-                        board.remove_piece_at(heldPieceIndex)
-                        drawHeldPiece(globalPSymbol)
-                    except:
+                prevMouseState = True
+                for p in Piece._pieceList:
+                    if (p.collideCheck(mousePos)):
                         try:
+                            if (board.turn == chess.WHITE):
+                                #print(invertIndex(p.index))
+                                globalPSymbol = board.piece_at(invertIndex(p.index)).symbol()
+                                fromSquare = indexToSquare(p.index)
+                                #print(indexToSquare(getMouseSquare(mousePos)))
+                            else:
+                                globalPSymbol = board.piece_at(invertIndex(p.index)).symbol()
+                                fromSquare = indexToSquare(p.index)
+                                #print(indexToSquare(getMouseSquare(mousePos)))
+                            heldPieceIcon = globalPSymbol
+                            heldPieceIndex = invertIndex(p.index)
+
+                            board.remove_piece_at(heldPieceIndex)
                             drawHeldPiece(globalPSymbol)
                         except:
-                            globalPSymbol = ""
-        elif (not pygame.mouse.get_pressed()[0] and prevMouseState): # Gets the square you let go of your mouse on
+                            try:
+                                drawHeldPiece(globalPSymbol)
+                            except:
+                                globalPSymbol = ""
+            else:
+                prevMouseState = pygame.mouse.get_pressed()[0]
+                mousePos = pygame.mouse.get_pos()
+                try:
+                    drawHeldPiece(globalPSymbol)
+                except:
+                    drawWindow()
+                #print(getMouseSquare(mousePos))
+        elif (prevMouseState): # Gets the square you let go of your mouse on
             toSquare = indexToSquare(getMouseSquare(mousePos))
             prevMouseState = False
 
@@ -552,38 +561,33 @@ def main():
                         globalPSymbol = ""
                         playAudio("move")
                         engineAnalysis(moveAttempt)
+
                         if wasBadMove():
                             print("ya garbage!")
+                            
                             badMove()
                         #drawWindow()
                     else:
                         globalPSymbol = ""
-                        if (heldPieceIcon != ""):
+                        try:
                             board.set_piece_at(heldPieceIndex, chess.Piece.from_symbol(heldPieceIcon))
                             heldPieceIcon = ""
+                        except:
+                            continue
                 except:
                     globalPSymbol = ""
-                    if (heldPieceIcon != ""):
+                    try:
                         board.set_piece_at(heldPieceIndex, chess.Piece.from_symbol(heldPieceIcon))
                         heldPieceIcon = ""
+                    except:
+                        continue
             else:
                 globalPSymbol = ""
                 #if (heldPieceIcon != ""):
                 board.set_piece_at(heldPieceIndex, chess.Piece.from_symbol(heldPieceIcon))
                 heldPieceIcon = ""
-        elif (pygame.mouse.get_pressed()[0]):
-            prevMouseState = pygame.mouse.get_pressed()[0]
-            mousePos = pygame.mouse.get_pos()
-            try:
-                drawHeldPiece(globalPSymbol)
-            except:
-                drawWindow()
-            #print(getMouseSquare(mousePos))
         else:
-            try:
-                drawHeldPiece(globalPSymbol)
-            except:
-                drawWindow()
+            drawWindow()
         clock.tick(FPS_CAP)
 
     pygame.quit()
