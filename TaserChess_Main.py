@@ -521,7 +521,7 @@ def main():
     boardStyle = boards.get(boardCustomizer.get(boardStyleIndex))
 
     while run:
-        if ((time.time() * 1000) - tazeTimer > 500):
+        if ((time.time() * 1000) - tazeTimer > 200):
             ardBoard.digital[WHITE_PIN].write(0)
             ardBoard.digital[BLACK_PIN].write(0)
 
