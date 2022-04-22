@@ -21,7 +21,7 @@ FPS_CAP = 165
 BOARD_ORIGIN = (560, 140)
 WHITE_PIN = 8
 BLACK_PIN = 9
-PORT = "COM6"
+PORT = "COM3"
 FONT = pygame.font.Font(None, 150)
 
 try:
