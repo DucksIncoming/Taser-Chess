@@ -492,8 +492,8 @@ def main():
     while run:
  
         # Clamps the floor of delta milliseconds divided by 300. Essentially just writes 1 if delta ms is under 300 and 0 if over
-        whiteTazeWrite = 1 - max(0, min(1, (math.floor((time.time() * 1000 - whiteTazeTimer) / 300))))
-        blackTazeWrite = 1 - max(0, min(1, (math.floor((time.time() * 1000 - blackTazeTimer) / 300))))
+        whiteTazeWrite = 1 - max(0, min(1, (math.floor((time.time() * 1000 - whiteTazeTimer) / 100))))
+        blackTazeWrite = 1 - max(0, min(1, (math.floor((time.time() * 1000 - blackTazeTimer) / 100))))
 
         #print(blackTazeWrite)
 
