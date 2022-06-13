@@ -6,4 +6,4 @@ Honestly I just thought of the idea of "chess, but with taser" was funny and ran
 
 **Also, feel free to fuck with the code however you like.
 
-Video: https://www.youtube.com/watch?v=lPGipwoJiOM
+Video: [https://www.youtube.com/watch?v=lPGipwoJiOM](https://youtu.be/l69a6e9DmIU)
